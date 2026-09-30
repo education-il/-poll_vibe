@@ -5,64 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PollVibe - סקר בחירות בלייב</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; user-select: none; }
         
-        body { background: #f8fafc; color: #0f172a; height: 100vh; overflow: hidden; position: relative; }
+        body { background: #e2e8f0; color: #0f172a; height: 100vh; overflow: hidden; position: relative; }
 
         /* לוגו בצד ימין למעלה */
         .school-logo {
             position: fixed;
-            top: 20px;
-            right: 25px;
+            top: 15px;
+            right: 20px;
             z-index: 1000;
         }
         .school-logo img {
-            height: 65px;
+            height: 60px;
             width: auto;
             object-fit: contain;
-            filter: drop-shadow(0px 2px 8px rgba(0,0,0,0.08));
+            filter: drop-shadow(0px 2px 8px rgba(0,0,0,0.1));
         }
 
         /* תצוגת נייד (תלמיד) */
         #student-view { 
             display: none; 
             height: 100vh; 
-            padding: 90px 15px 20px 15px; 
+            padding: 85px 12px 15px 12px; 
             flex-direction: column; 
             justify-content: center;
             position: relative;
         }
+        
+        /* גריד פתקיות הצבעה */
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
-            gap: 10px; 
+            gap: 12px; 
             height: 100%;
-            max-height: calc(100vh - 110px);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            padding: 5px;
         }
-        .party-card { 
+
+        /* עיצוב פתקית הצבעה (כמו בקלפי) */
+        .ballot-paper { 
             background: #ffffff; 
-            border: 2px solid #e2e8f0; 
-            border-radius: 14px; 
-            padding: 10px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 4px; 
+            padding: 12px 8px; 
             display: flex; 
+            flex-direction: column;
             align-items: center; 
-            justify-content: center; 
-            font-size: 1.1rem; 
-            font-weight: bold; 
+            justify-content: space-between; 
             text-align: center; 
-            color: #1e293b; 
-            transition: all 0.2s; 
+            color: #000000; 
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08), inset 0 0 12px rgba(0,0,0,0.02);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            min-height: 140px;
         }
-        .party-card:active { transform: scale(0.96); background: #2563eb; color: white; }
+        .ballot-paper:active { 
+            transform: scale(0.96); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+
+        .ballot-letters {
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            color: #000000;
+            margin-top: 5px;
+        }
+
+        .ballot-subtext {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.2;
+            margin-bottom: 5px;
+        }
 
         /* נעילת תלמיד */
         #lock-overlay {
             display: flex;
             position: absolute;
             inset: 0;
-            background: rgba(248, 250, 252, 0.95);
+            background: rgba(248, 250, 252, 0.96);
             backdrop-filter: blur(8px);
             z-index: 500;
             flex-direction: column;
@@ -76,14 +102,57 @@
         .lock-title { font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
         .lock-subtitle { font-size: 1rem; color: #64748b; }
 
-        /* פופ-אפ אישור */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1100; backdrop-filter: blur(4px); }
-        .modal-content { background: #ffffff; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 350px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
-        .btn { padding: 12px 24px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin: 8px; font-size: 1rem; }
-        .btn-confirm { background: #22c55e; color: white; }
-        .btn-cancel { background: #ef4444; color: white; }
+        /* פופ-אפ אישור הצבעה מוגדל */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); align-items: center; justify-content: center; z-index: 1100; backdrop-filter: blur(6px); }
+        .modal-content { 
+            background: #f8fafc; 
+            padding: 25px 20px; 
+            border-radius: 16px; 
+            text-align: center; 
+            width: 90%; 
+            max-width: 380px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* פתק ענק בחלון האישור */
+        .large-ballot {
+            background: #ffffff;
+            width: 220px;
+            height: 310px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 25px 15px;
+            margin: 15px 0 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        }
+        .large-ballot .large-letters {
+            font-size: 4.8rem;
+            font-weight: 900;
+            color: #000;
+            line-height: 1;
+            margin-top: 20px;
+        }
+        .large-ballot .large-subtext {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
 
-        /* === תצוגת מנהל / צופים משודרגת === */
+        .modal-buttons { display: flex; gap: 10px; width: 100%; justify-content: center; }
+        .btn { padding: 14px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 1.05rem; flex: 1; }
+        .btn-confirm { background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
+        .btn-cancel { background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
+
+        /* === תצוגת מנהל / צופים === */
         #admin-view { 
             display: none; 
             height: 100vh; 
@@ -95,7 +164,6 @@
             position: relative;
         }
         
-        /* מכלול מרכזי */
         .admin-main-container {
             display: flex;
             align-items: center;
@@ -114,18 +182,12 @@
             justify-content: center;
         }
 
-        /* אזור ברקוד */
         .qr-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            background: transparent;
-            padding: 0;
-            border-radius: 0;
-            border: none;
-            box-shadow: none;
             width: 300px;
             height: 300px;
         }
@@ -150,7 +212,6 @@
             z-index: 2;
         }
 
-        /* ספירת קולות מתחת */
         .vote-counter-under {
             display: flex;
             flex-direction: column;
@@ -171,7 +232,7 @@
             font-weight: 600; 
         }
 
-        /* מעטפות */
+        /* מעטפות נופלות לקלפי */
         .envelope { 
             position: absolute; 
             width: 50px; 
@@ -187,38 +248,19 @@
         .envelope::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             border-left: 25px solid transparent;
             border-right: 25px solid transparent;
             border-top: 18px solid #f1f5f9;
         }
 
         @keyframes dropIntoKalfi {
-            0% { 
-                top: -120px; 
-                opacity: 0; 
-                transform: scale(1.1) rotate(-15deg); 
-            }
-            20% { 
-                opacity: 1; 
-            }
-            85% { 
-                top: 40px; 
-                opacity: 1; 
-                transform: scale(0.9) rotate(5deg); 
-            }
-            100% { 
-                top: 75px; 
-                opacity: 0; 
-                transform: scale(0.3) rotate(0deg); 
-            }
+            0% { top: -120px; opacity: 0; transform: scale(1.1) rotate(-15deg); }
+            20% { opacity: 1; }
+            85% { top: 40px; opacity: 1; transform: scale(0.9) rotate(5deg); }
+            100% { top: 75px; opacity: 0; transform: scale(0.3) rotate(0deg); }
         }
-
-        .timer-display { font-size: 1.6rem; color: #dc2626; font-weight: 700; height: 30px; }
         
-        /* כפתורי ניהול מוצנעים בצד שמאל למטה */
         .stealth-admin-panel {
             position: fixed;
             bottom: 25px;
@@ -253,11 +295,7 @@
             transform: scale(1.05);
         }
 
-        .stealth-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
+        .stealth-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
         /* מסך תוצאות */
         #results-screen { 
@@ -359,7 +397,7 @@
         }
         .row-val.show-val { opacity: 1; }
 
-        /* מסך מעבר/ספירה לאחור */
+        /* מסך מעבר/ספירה לאחור של חשיפת תוצאות */
         #countdown-overlay {
             display: none;
             position: fixed;
@@ -393,26 +431,39 @@
             100% { transform: scale(1.25); opacity: 0; }
         }
 
+        /* האנימציה החדשה: גדילה רציפה והתפוצצות בסוף */
         .countdown-number {
-            font-size: 18rem;
+            font-size: 14rem;
             font-weight: 900;
             color: #ffffff;
-            text-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+            text-shadow: 0 0 40px rgba(59, 130, 246, 0.9);
             z-index: 2001;
-            animation: zoomAndPop 1s cubic-bezier(0.11, 0, 0.5, 1) forwards;
+            animation: growAndExplode 1s ease-in forwards;
         }
 
-        @keyframes zoomAndPop {
-            0% { transform: scale(0.2); opacity: 0; }
-            50% { transform: scale(1.1); opacity: 1; }
-            80% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.8); opacity: 0; }
+        @keyframes growAndExplode {
+            0% {
+                transform: scale(0.3);
+                opacity: 0.2;
+            }
+            85% {
+                transform: scale(1.6);
+                opacity: 1;
+            }
+            95% {
+                transform: scale(1.9);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.4);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- לוגו דרכא -->
+    <!-- לוגו -->
     <div class="school-logo">
         <img src="logo.png" alt="תיכון דרכא">
     </div>
@@ -430,40 +481,42 @@
         <div class="grid-container" id="parties-grid"></div>
     </div>
 
-    <!-- פופ אפ אישור תלמיד -->
+    <!-- פופ אפ אישור תלמיד (פתק מוגדל) -->
     <div class="modal" id="confirm-modal">
         <div class="modal-content">
-            <h3 style="color: #0f172a;">אישור הצבעה</h3>
-            <p id="modal-text" style="margin: 15px 0; font-size: 1.2rem; color: #475569;"></p>
-            <button class="btn btn-confirm" onclick="submitVote()">אישור והצבעה</button>
-            <button class="btn btn-cancel" onclick="closeModal()">שינוי בחירה</button>
+            <h3 style="color: #0f172a; font-size: 1.3rem;">אישור בחירה</h3>
+            <p style="color: #64748b; font-size: 0.95rem; margin-top: 4px;">זהו הפתק שייכנס למעטפה:</p>
+            
+            <div class="large-ballot">
+                <div class="large-letters" id="modal-letters">מחל</div>
+                <div class="large-subtext" id="modal-subtext">הליכוד בהנהגת בנימין נתניהו לראשות הממשלה</div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-confirm" onclick="submitVote()">אישור והצבעה</button>
+                <button class="btn btn-cancel" onclick="closeModal()">חזרה לבחירה</button>
+            </div>
         </div>
     </div>
 
     <!-- מסך מנהל / צופים -->
     <div id="admin-view">
         <div class="admin-main-container">
-            <!-- קוד QR -->
             <div class="qr-container">
                 <div class="qr-label">סירקו להצבעה</div>
                 <img src="pollvibe_qr.png" alt="QR לסריקה" class="qr-image">
             </div>
 
-            <!-- קלפי -->
             <div class="box-container" id="box-container">
                 <img src="kalfi_tp.png" alt="קלפי" class="kalfi-image">
             </div>
         </div>
 
-        <!-- מונה קולות -->
         <div class="vote-counter-under">
             <div class="vote-count" id="vote-count">0</div>
             <div class="vote-label">תלמידים הצביעו</div>
         </div>
 
-        <div class="timer-display" id="timer-display"></div>
-
-        <!-- כפתורי ניהול מוצנעים בצד שמאל למטה -->
         <div class="stealth-admin-panel">
             <button class="stealth-btn" id="stealth-main-btn" onclick="handleMainFlow()" title="ניהול הצבעה">
                 <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -488,22 +541,38 @@
         <div class="horizontal-chart-container" id="chart-container"></div>
     </div>
 
-    <!-- מסך מעבר/ספירה לאחור -->
+    <!-- מסך מעבר חשיפה לקראת התוצאות -->
     <div id="countdown-overlay">
         <canvas id="fireworks-canvas"></canvas>
         <div id="countdown-num-box"></div>
     </div>
 
     <script>
+        const MAIN_PARTIES = [
+            { letters: 'מחל', name: 'הליכוד בהנהגת בנימין נתניהו לראשות הממשלה' },
+            { letters: 'רק', name: 'ביחד בראשות נפתלי בנט' },
+            { letters: 'כן', name: 'כחול לבן בראשות בני גנץ' },
+            { letters: 'אמת', name: 'הדמוקרטים בראשות יאיר גולן' },
+            { letters: 'שס', name: 'התאחדות הספרדים שומרי התורה' },
+            { letters: 'ג', name: 'יהדות התורה והשבת אגודת ישראל - דגל התורה' },
+            { letters: 'ט', name: 'הציונות הדתית בראשות בצלאל סמוטריץ\' וזהות בראשות משה פייגלין' },
+            { letters: 'ב', name: 'עוצמה יהודית בראשות איתמר בן גביר' },
+            { letters: 'ל', name: 'ישראל ביתנו בראשות אביגדור ליברמן' },
+            { letters: 'עם', name: 'רע"ם - הרשימה הערבית המאוחדת' },
+            { letters: 'ודם', name: 'הרשימה המשותפת' },
+            { letters: 'דרך', name: 'בראשות גדי איזנקוט' },
+            { letters: 'ך', name: 'עמך ישראל בראשות עופר וינטר' },
+            { letters: 'ני', name: 'נעם לישראל למען עתיד הילדים בראשות אבי מעוז' }
+        ];
+
         const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
         
         let deviceId = localStorage.getItem('poll_device_id') || 'dev_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('poll_device_id', deviceId);
 
-        let selectedParty = null;
+        let selectedPartyObj = null;
         let isAdmin = location.pathname.includes('/admin-control-x9z87');
         let currentStatus = 'closed';
-        let partiesData = [];
         let votesData = {};
 
         let hasVotedInSession = false;
@@ -523,7 +592,6 @@
             const data = JSON.parse(event.data);
 
             if (data.type === 'INIT') {
-                partiesData = data.parties;
                 votesData = data.state.votes || {};
                 currentStatus = data.state.status;
                 
@@ -559,21 +627,13 @@
                 }
             }
 
-            if (data.type === 'START_COUNTDOWN') {
-                document.getElementById('timer-display').innerText = "הצבעה נסגרת בעוד: 10";
-            }
-
-            if (data.type === 'TIMER_TICK') {
-                if (data.timer > 0) {
-                    document.getElementById('timer-display').innerText = `הצבעה נסגרת בעוד: ${data.timer}`;
-                } else {
-                    document.getElementById('timer-display').innerText = "";
-                }
-            }
-
             if (data.type === 'VOTE_SUCCESS') {
                 if (!isSimulating) {
-                    document.getElementById('student-view').innerHTML = `<h1 style="text-align:center; margin-top:40vh; color:#22c55e;">תודתך נקלטה!<br>הצבעת ל-${cleanPartyName(data.party)}</h1>`;
+                    document.getElementById('student-view').innerHTML = `
+                        <div style="text-align:center; margin-top:30vh; padding: 20px;">
+                            <h1 style="color:#16a34a; font-size:2.2rem; margin-bottom:15px;">הצבעתך נקלטה בהצלחה!</h1>
+                            <p style="color:#475569; font-size:1.2rem;">תודה על השתתפותך במדגם.</p>
+                        </div>`;
                 }
             }
 
@@ -602,30 +662,28 @@
             }
         }
 
-        function cleanPartyName(fullName) {
-            if (!fullName) return '';
-            return fullName.split('-')[0].trim();
-        }
-
+        /* רינדור פתקיות ההצבעה לתלמיד */
         function renderStudentGrid() {
             const grid = document.getElementById('parties-grid');
             grid.innerHTML = '';
-            
-            const columns = partiesData.length > 6 ? 2 : 1;
-            grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
 
-            partiesData.forEach(party => {
-                const card = document.createElement('div');
-                card.className = 'party-card';
-                card.innerText = cleanPartyName(party);
-                card.onclick = () => openModal(party);
-                grid.appendChild(card);
+            MAIN_PARTIES.forEach(party => {
+                const paper = document.createElement('div');
+                paper.className = 'ballot-paper';
+                paper.innerHTML = `
+                    <div class="ballot-letters">${party.letters}</div>
+                    <div class="ballot-subtext">${party.name}</div>
+                `;
+                paper.onclick = () => openModal(party);
+                grid.appendChild(paper);
             });
         }
 
+        /* פתיחת חלון אישור פתק מוגדל */
         function openModal(party) {
-            selectedParty = party;
-            document.getElementById('modal-text').innerText = `האם אתה בטוח שברצונך להצביע ל-${cleanPartyName(party)}?`;
+            selectedPartyObj = party;
+            document.getElementById('modal-letters').innerText = party.letters;
+            document.getElementById('modal-subtext').innerText = party.name;
             document.getElementById('confirm-modal').style.display = 'flex';
         }
 
@@ -635,7 +693,8 @@
 
         function submitVote() {
             closeModal();
-            ws.send(JSON.stringify({ type: 'VOTE', party: selectedParty, deviceId }));
+            const partyIdentifier = `${selectedPartyObj.letters} - ${selectedPartyObj.name}`;
+            ws.send(JSON.stringify({ type: 'VOTE', party: partyIdentifier, deviceId }));
         }
 
         function updateAdminUI(total) {
@@ -702,12 +761,13 @@
                 return;
             }
 
-            const randomParty = partiesData[Math.floor(Math.random() * partiesData.length)];
+            const randomPartyObj = MAIN_PARTIES[Math.floor(Math.random() * MAIN_PARTIES.length)];
+            const partyIdentifier = `${randomPartyObj.letters} - ${randomPartyObj.name}`;
             const fakeDeviceId = 'sim_dev_' + Math.random().toString(36).substr(2, 9) + '_' + simVotesCount;
 
             ws.send(JSON.stringify({
                 type: 'VOTE',
-                party: randomParty,
+                party: partyIdentifier,
                 deviceId: fakeDeviceId
             }));
 
@@ -730,7 +790,7 @@
             setTimeout(() => env.remove(), 1200);
         }
 
-        /* --- מצג מעבר + ספירה לאחור --- */
+        /* --- מעבר ספירה לאחור וחשיפת התוצאות --- */
         function startGrandCountdown() {
             if (isSimulating) stopSimulationInternal();
 
@@ -751,7 +811,7 @@
                 if (phraseIdx < phrases.length) {
                     numBox.innerHTML = `<div class="intro-phrase" key="${phraseIdx}">${phrases[phraseIdx]}</div>`;
                     phraseIdx++;
-                    setTimeout(showNextPhrase, 3000); // 3 שניות לקריאה לכל משפט
+                    setTimeout(showNextPhrase, 3000);
                 } else {
                     initFireworksCanvas();
                     startNumbersCountdown();
@@ -764,7 +824,12 @@
                 function step() {
                     if (count > 0) {
                         numBox.innerHTML = `<div class="countdown-number" key="c-${count}">${count}</div>`;
-                        createFireworkExplosion();
+                        
+                        // פיצוץ זיקוקים בדיוק בשיא הגדילה (בסוף השנייה)
+                        setTimeout(() => {
+                            createFireworkExplosion();
+                        }, 850);
+
                         count--;
                         setTimeout(step, 1000);
                     } else {
@@ -786,7 +851,9 @@
             const container = document.getElementById('chart-container');
             container.innerHTML = '';
 
-            let sortedParties = [...partiesData].sort((a, b) => {
+            let allPartyKeys = MAIN_PARTIES.map(p => `${p.letters} - ${p.name}`);
+
+            let sortedParties = allPartyKeys.sort((a, b) => {
                 const countA = votesData[a] || 0;
                 const countB = votesData[b] || 0;
                 return countB - countA;
@@ -794,37 +861,37 @@
 
             let maxVotes = Math.max(...Object.values(votesData), 1);
 
-            sortedParties.forEach((party, index) => {
-                const count = votesData[party] || 0;
+            sortedParties.forEach((partyKey, index) => {
+                const count = votesData[partyKey] || 0;
                 const pct = (count / maxVotes) * 100;
 
                 const isFastStart = (index === 2 || index === 3);
-                const displayPartyName = cleanPartyName(party);
+                const displayPartyName = partyKey.split('-')[0].trim() + ' - ' + (partyKey.split('-')[1] || '').trim();
 
                 const row = document.createElement('div');
                 row.className = 'row-group';
                 row.innerHTML = `
                     <div class="row-label" title="${displayPartyName}">${displayPartyName}</div>
                     <div class="row-bar-wrapper">
-                        <div class="row-bar ${isFastStart ? 'row-bar-fast-start' : ''}" style="width: 0%" id="bar-${encodeURIComponent(party)}"></div>
+                        <div class="row-bar ${isFastStart ? 'row-bar-fast-start' : ''}" style="width: 0%" id="bar-${encodeURIComponent(partyKey)}"></div>
                     </div>
-                    <div class="row-val" id="val-${encodeURIComponent(party)}">${count}</div>
+                    <div class="row-val" id="val-${encodeURIComponent(partyKey)}">${count}</div>
                 `;
                 container.appendChild(row);
 
                 setTimeout(() => {
-                    const barEl = document.getElementById(`bar-${encodeURIComponent(party)}`);
+                    const barEl = document.getElementById(`bar-${encodeURIComponent(partyKey)}`);
                     if (barEl) barEl.style.width = pct + '%';
                 }, 200);
 
                 setTimeout(() => {
-                    const valEl = document.getElementById(`val-${encodeURIComponent(party)}`);
+                    const valEl = document.getElementById(`val-${encodeURIComponent(partyKey)}`);
                     if (valEl) valEl.classList.add('show-val');
                 }, 3800);
             });
         }
 
-        /* --- זיקוקים --- */
+        /* --- זיקוקים בספירה לאחור --- */
         let canvas, ctx, particles = [];
 
         function initFireworksCanvas() {
@@ -841,9 +908,9 @@
             const y = window.innerHeight / 2;
             const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ffffff'];
 
-            for (let i = 0; i < 80; i++) {
+            for (let i = 0; i < 110; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 12 + 2;
+                const speed = Math.random() * 14 + 3;
                 particles.push({
                     x: x,
                     y: y,
@@ -858,7 +925,7 @@
 
         function loopFireworks() {
             if (!canvas) return;
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             for (let i = particles.length - 1; i >= 0; i--) {
