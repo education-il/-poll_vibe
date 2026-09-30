@@ -38,7 +38,8 @@
 
         .timer-display { font-size: 3rem; color: #ef4444; font-weight: bold; height: 60px; }
         .admin-actions { display: flex; justify-content: center; gap: 20px; }
-        .admin-btn { padding: 15px 30px; font-size: 1.2rem; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; }
+        .admin-btn { padding: 15px 30px; font-size: 1.2rem; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.3s; }
+        .admin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-start { background: #22c55e; color: white; }
         .btn-stop { background: #eab308; color: black; }
         .btn-reset { background: #ef4444; color: white; }
@@ -85,7 +86,7 @@
         <div class="admin-actions">
             <button class="admin-btn btn-start" id="toggle-btn" onclick="toggleVoting()">התחל הצבעה</button>
             <button class="admin-btn btn-reset" onclick="resetVoting()">איפוס הצבעה</button>
-            <button class="admin-btn" style="background: #a855f7; color: white;" onclick="showResults()">חשוף תוצאות</button>
+            <button class="admin-btn" id="reveal-btn" style="background: #a855f7; color: white;" onclick="showResults()" disabled>חשוף תוצאות</button>
         </div>
     </div>
 
@@ -99,7 +100,6 @@
     <script>
         const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
         
-        // מזהה ייחודי למכשיר
         let deviceId = localStorage.getItem('poll_device_id') || 'dev_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('poll_device_id', deviceId);
 
@@ -109,7 +109,6 @@
         let partiesData = [];
         let votesData = {};
 
-        // נתיבים
         if (isAdmin) {
             document.getElementById('admin-view').style.display = 'flex';
         } else {
@@ -121,7 +120,7 @@
 
             if (data.type === 'INIT') {
                 partiesData = data.parties.sort((a,b) => a.localeCompare(b, 'he'));
-                votesData = data.state.votes;
+                votesData = data.state.votes || {};
                 currentStatus = data.state.status;
                 
                 if (!isAdmin) renderStudentGrid();
@@ -129,6 +128,7 @@
             }
 
             if (data.type === 'NEW_VOTE') {
+                votesData[data.party] = (votesData[data.party] || 0) + 1;
                 if (isAdmin) {
                     document.getElementById('vote-count').innerText = data.totalVotes;
                     spawnEnvelope();
@@ -161,7 +161,6 @@
             }
         };
 
-        // לוגיקת תלמיד
         function renderStudentGrid() {
             const grid = document.getElementById('parties-grid');
             grid.innerHTML = '';
@@ -189,21 +188,24 @@
             ws.send(JSON.stringify({ type: 'VOTE', party: selectedParty, deviceId }));
         }
 
-        // לוגיקת מנהל
         function updateAdminUI(total) {
             const btn = document.getElementById('toggle-btn');
             const statusText = document.getElementById('status-text');
+            const revealBtn = document.getElementById('reveal-btn');
 
             if (currentStatus === 'closed') {
                 statusText.innerText = "מצב הצבעה: סגור";
                 btn.innerText = "התחל הצבעה";
                 btn.className = "admin-btn btn-start";
+                revealBtn.disabled = false; // אפשר ללחוץ רק כשההצבעה סגורה
             } else if (currentStatus === 'voting') {
                 statusText.innerText = "מצב הצבעה: אוסף קולות...";
                 btn.innerText = "עצור הצבעה";
                 btn.className = "admin-btn btn-stop";
+                revealBtn.disabled = true; // מנוטרל בזמן איסוף
             } else if (currentStatus === 'stopping') {
                 statusText.innerText = "מצב הצבעה: נעצר...";
+                revealBtn.disabled = true; // מנוטרל בזמן ספירה לאחור
             }
         }
 
