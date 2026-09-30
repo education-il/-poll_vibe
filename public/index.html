@@ -373,6 +373,8 @@
             padding: 20px;
         }
         
+        #fireworks-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2000; }
+
         .intro-phrase {
             font-size: 4.5rem;
             font-weight: 900;
@@ -488,6 +490,7 @@
 
     <!-- מסך מעבר/ספירה לאחור -->
     <div id="countdown-overlay">
+        <canvas id="fireworks-canvas"></canvas>
         <div id="countdown-num-box"></div>
     </div>
 
@@ -750,6 +753,7 @@
                     phraseIdx++;
                     setTimeout(showNextPhrase, 3000); // 3 שניות לקריאה לכל משפט
                 } else {
+                    initFireworksCanvas();
                     startNumbersCountdown();
                 }
             }
@@ -760,6 +764,7 @@
                 function step() {
                     if (count > 0) {
                         numBox.innerHTML = `<div class="countdown-number" key="c-${count}">${count}</div>`;
+                        createFireworkExplosion();
                         count--;
                         setTimeout(step, 1000);
                     } else {
@@ -817,6 +822,66 @@
                     if (valEl) valEl.classList.add('show-val');
                 }, 3800);
             });
+        }
+
+        /* --- זיקוקים --- */
+        let canvas, ctx, particles = [];
+
+        function initFireworksCanvas() {
+            canvas = document.getElementById('fireworks-canvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            requestAnimationFrame(loopFireworks);
+        }
+
+        function createFireworkExplosion() {
+            const x = window.innerWidth / 2;
+            const y = window.innerHeight / 2;
+            const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ffffff'];
+
+            for (let i = 0; i < 80; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 12 + 2;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        function loopFireworks() {
+            if (!canvas) return;
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            requestAnimationFrame(loopFireworks);
         }
     </script>
 </body>
