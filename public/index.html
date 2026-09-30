@@ -102,8 +102,8 @@
             height: 100vh; 
             flex-direction: column; 
             justify-content: center; 
-            gap: 20px;
-            padding: 80px 30px 30px 30px; 
+            gap: 15px;
+            padding: 70px 30px 20px 30px; 
             text-align: center; 
             align-items: center; 
         }
@@ -113,45 +113,46 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 50px;
+            gap: 60px;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
         }
 
         .box-container { 
             position: relative; 
-            width: 240px; 
+            width: 360px; /* הוגדל ב-50% */
             display: flex; 
             flex-direction: column; 
             align-items: center; 
         }
 
-        /* קוד QR משמאל לקלפי */
+        /* קוד QR משמאל לקלפי - מוגדל ב-50% */
         .qr-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
             background: #ffffff;
-            padding: 15px;
-            border-radius: 16px;
+            padding: 20px;
+            border-radius: 20px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
         .qr-image {
-            width: 180px;
-            height: 180px;
+            width: 270px; /* הוגדל ב-50% מ-180px */
+            height: 270px; /* הוגדל ב-50% מ-180px */
             object-fit: contain;
             border-radius: 8px;
         }
         .qr-label {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: #334155;
         }
         
+        /* תמונת קלפי - מוגדלת ב-50% */
         .kalfi-image { 
-            width: 220px; 
+            width: 330px; /* הוגדל ב-50% מ-220px */
             height: auto; 
             object-fit: contain; 
             filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.12));
@@ -159,37 +160,36 @@
             z-index: 2;
         }
 
-        /* מונה קולות נקי */
+        /* מונה קולות נקי - כעת ממוקם מתחת לכל האזור המרכזי */
         .vote-counter-under {
-            margin-top: 10px;
+            margin-top: 5px;
             background: transparent;
             padding: 5px;
-            border: none;
-            box-shadow: none;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .vote-count { font-size: 3.2rem; font-weight: 900; color: #2563eb; line-height: 1; }
-        .vote-label { font-size: 0.95rem; color: #64748b; margin-top: 4px; font-weight: 600; }
+        .vote-count { font-size: 3.5rem; font-weight: 900; color: #2563eb; line-height: 1; }
+        .vote-label { font-size: 1.05rem; color: #64748b; margin-top: 4px; font-weight: 600; }
 
+        /* מעטפה מוגדלת ב-50% */
         .envelope { 
             position: absolute; 
-            width: 40px; 
-            height: 26px; 
+            width: 60px; /* הוגדל ב-50% מ-40px */
+            height: 39px; /* הוגדל ב-50% מ-26px */
             background: #fef08a; 
-            border: 2px solid #ca8a04; 
-            border-radius: 4px; 
-            top: -40px; 
+            border: 3px solid #ca8a04; 
+            border-radius: 5px; 
+            top: -50px; 
             z-index: 1; 
             animation: dropIntoKalfi 1.1s ease-in forwards; 
         }
 
         @keyframes dropIntoKalfi {
-            0% { top: -40px; opacity: 0; transform: scale(1.2) rotate(-10deg); }
+            0% { top: -50px; opacity: 0; transform: scale(1.2) rotate(-10deg); }
             30% { opacity: 1; }
-            80% { top: 40px; opacity: 1; transform: scale(0.85) rotate(5deg); }
-            100% { top: 60px; opacity: 0; transform: scale(0.4) rotate(0deg); }
+            80% { top: 60px; opacity: 1; transform: scale(0.85) rotate(5deg); }
+            100% { top: 90px; opacity: 0; transform: scale(0.4) rotate(0deg); }
         }
 
         .timer-display { font-size: 1.8rem; color: #dc2626; font-weight: bold; height: 35px; }
@@ -407,20 +407,22 @@
     <!-- מסך מנהל -->
     <div id="admin-view">
         <div class="admin-main-container">
-            <!-- קוד QR לסריקה משמאל לקלפי -->
+            <!-- קוד QR לסריקה משמאל לקלפי (מוגדל ב-50%) -->
             <div class="qr-container">
                 <img src="pollvibe_qr.png" alt="QR לסריקה" class="qr-image">
                 <div class="qr-label">סרק להצבעה 📱</div>
             </div>
 
-            <!-- קלפי ומונה קולות -->
+            <!-- קלפי (מוגדלת ב-50%) -->
             <div class="box-container" id="box-container">
                 <img src="kalfi_tp.png" alt="קלפי" class="kalfi-image">
-                <div class="vote-counter-under">
-                    <div class="vote-count" id="vote-count">0</div>
-                    <div class="vote-label">קולות שנרשמו</div>
-                </div>
             </div>
+        </div>
+
+        <!-- מונה קולות ממוקם כעת מתחת לברקוד ולקלפי -->
+        <div class="vote-counter-under">
+            <div class="vote-count" id="vote-count">0</div>
+            <div class="vote-label">קולות שנרשמו</div>
         </div>
 
         <div class="timer-display" id="timer-display"></div>
@@ -692,7 +694,7 @@
             const container = document.getElementById('box-container');
             const env = document.createElement('div');
             env.className = 'envelope';
-            env.style.left = (100 + (Math.random() * 40 - 20)) + 'px';
+            env.style.left = (150 + (Math.random() * 60 - 30)) + 'px';
             container.appendChild(env);
             setTimeout(() => env.remove(), 1100);
         }
