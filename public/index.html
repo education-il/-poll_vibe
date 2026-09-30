@@ -43,7 +43,7 @@
             padding-bottom: 40px;
         }
 
-        /* עיצוב פתקית הצבעה (כמו בקלפי) */
+        /* עיצוב פתקית הצבעה */
         .ballot-paper { 
             background: #ffffff; 
             border: 1px solid #cbd5e1; 
@@ -116,7 +116,6 @@
             align-items: center;
         }
         
-        /* פתק ענק בחלון האישור */
         .large-ballot {
             background: #ffffff;
             width: 220px;
@@ -151,7 +150,7 @@
         .btn-confirm { background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
         .btn-cancel { background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
 
-        /* === תצוגת מנהל / צופים מקורית === */
+        /* === תצוגת מנהל === */
         #admin-view { 
             display: none; 
             height: 100vh; 
@@ -234,7 +233,6 @@
             font-weight: 600; 
         }
 
-        /* מעטפות נופלות לקלפי */
         .envelope { 
             position: absolute; 
             width: 50px; 
@@ -399,7 +397,7 @@
         }
         .row-val.show-val { opacity: 1; }
 
-        /* מסך מעבר/ספירה לאחור של חשיפת תוצאות */
+        /* מסך מעבר/ספירה לאחור */
         #countdown-overlay {
             display: none;
             position: fixed;
@@ -433,6 +431,7 @@
             100% { transform: scale(1.25); opacity: 0; }
         }
 
+        /* ספירה לאחור: השרשרת גודלת ומתפוצצת */
         .countdown-number {
             font-size: 14rem;
             font-weight: 900;
@@ -443,10 +442,18 @@
         }
 
         @keyframes growAndExplode {
-            0% { transform: scale(0.3); opacity: 0.2; }
-            85% { transform: scale(1.6); opacity: 1; }
-            95% { transform: scale(1.9); opacity: 1; }
-            100% { transform: scale(2.4); opacity: 0; }
+            0% { 
+                transform: scale(0.3); 
+                opacity: 0.1; 
+            }
+            85% { 
+                transform: scale(1.5); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(2.2); 
+                opacity: 0; 
+            }
         }
     </style>
 </head>
@@ -470,7 +477,7 @@
         <div class="grid-container" id="parties-grid"></div>
     </div>
 
-    <!-- פופ אפ אישור תלמיד (פתק מוגדל) -->
+    <!-- פופ אפ אישור תלמיד -->
     <div class="modal" id="confirm-modal">
         <div class="modal-content">
             <h3 style="color: #0f172a; font-size: 1.3rem;">אישור בחירה</h3>
@@ -530,7 +537,7 @@
         <div class="horizontal-chart-container" id="chart-container"></div>
     </div>
 
-    <!-- מסך מעבר חשיפה לקראת התוצאות -->
+    <!-- מסך מעבר לקראת התוצאות -->
     <div id="countdown-overlay">
         <canvas id="fireworks-canvas"></canvas>
         <div id="countdown-num-box"></div>
@@ -651,7 +658,6 @@
             }
         }
 
-        /* רינדור פתקיות ההצבעה לתלמיד */
         function renderStudentGrid() {
             const grid = document.getElementById('parties-grid');
             grid.innerHTML = '';
@@ -668,7 +674,6 @@
             });
         }
 
-        /* פתיחת חלון אישור פתק מוגדל */
         function openModal(party) {
             selectedPartyObj = party;
             document.getElementById('modal-letters').innerText = party.letters;
@@ -706,12 +711,14 @@
             }
         }
 
+        /* עצירה מיידית בלחיצה */
         function handleMainFlow() {
             if (currentStatus === 'closed' && !hasVotedInSession) {
                 if (isSimulating) stopSimulationInternal();
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'START' }));
             } else if (currentStatus === 'voting') {
                 if (isSimulating) stopSimulationInternal();
+                // עצירה מיידית ללא שום השהיה
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'STOP' }));
             } else if (currentStatus === 'closed' && hasVotedInSession) {
                 startGrandCountdown();
@@ -779,7 +786,7 @@
             setTimeout(() => env.remove(), 1200);
         }
 
-        /* --- מעבר ספירה לאחור וחשיפת התוצאות --- */
+        /* --- מעבר ספירה לאחור: המספר גדל ומתפוצץ בזיקוקים --- */
         function startGrandCountdown() {
             if (isSimulating) stopSimulationInternal();
 
@@ -814,6 +821,7 @@
                     if (count > 0) {
                         numBox.innerHTML = `<div class="countdown-number" key="c-${count}">${count}</div>`;
                         
+                        // פיצוץ הזיקוקים בשיא הגדילה של המספר (בסוף השנייה)
                         setTimeout(() => {
                             createFireworkExplosion();
                         }, 850);
@@ -879,7 +887,7 @@
             });
         }
 
-        /* --- זיקוקים בספירה לאחור --- */
+        /* --- מנוע זיקוקים --- */
         let canvas, ctx, particles = [];
 
         function initFireworksCanvas() {
