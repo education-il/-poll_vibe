@@ -261,7 +261,6 @@
             100% { top: 75px; opacity: 0; transform: scale(0.3) rotate(0deg); }
         }
         
-        /* פאנל כפתורים מוצנעים */
         .stealth-admin-panel {
             position: fixed;
             bottom: 25px;
@@ -299,7 +298,6 @@
 
         .stealth-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
-        /* מספר גרסה מתחת לאייקונים */
         .version-tag {
             font-size: 0.75rem;
             font-weight: 700;
@@ -423,7 +421,24 @@
             padding: 20px;
         }
         
-        #fireworks-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2000; }
+        /* הקנבס נמצא בשכבה מתחת לטקסט */
+        #fireworks-canvas { 
+            position: absolute; 
+            inset: 0; 
+            width: 100%; 
+            height: 100%; 
+            pointer-events: none; 
+            z-index: 2000; 
+        }
+
+        /* תיבת המספרים ממוקמת מעל הקנבס */
+        #countdown-num-box {
+            position: relative;
+            z-index: 2005;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         .intro-phrase {
             font-size: 4.5rem;
@@ -431,7 +446,6 @@
             color: #ffffff;
             text-align: center;
             text-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-            z-index: 2001;
             line-height: 1.2;
             animation: zoomAndFade 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -448,7 +462,6 @@
             font-weight: 900;
             color: #ffffff;
             text-shadow: 0 0 40px rgba(59, 130, 246, 0.9);
-            z-index: 2001;
             animation: growAndExplode 1s ease-in forwards;
         }
 
@@ -530,8 +543,8 @@
                 <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
             </button>
 
-            <!-- תצוגת גרסה -->
-            <div class="version-tag">v1.20</div>
+            <!-- גרסה מעודכנת -->
+            <div class="version-tag">v1.21</div>
         </div>
     </div>
 
@@ -716,7 +729,6 @@
             }
         }
 
-        /* עצירה מיידית והחלפת אייקון מיידית לעין */
         function handleMainFlow() {
             if (currentStatus === 'closed' && !hasVotedInSession) {
                 if (isSimulating) stopSimulationInternal();
@@ -724,12 +736,10 @@
             } else if (currentStatus === 'voting') {
                 if (isSimulating) stopSimulationInternal();
                 
-                // עדכון מקומי מיידי של האייקון לעין כדי למנוע השהיה תפיסתית
                 currentStatus = 'closed';
                 hasVotedInSession = true;
                 updateAdminUI();
 
-                // שליחת אירוע העצירה לשרת
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'STOP' }));
             } else if (currentStatus === 'closed' && hasVotedInSession) {
                 startGrandCountdown();
@@ -897,7 +907,7 @@
             });
         }
 
-        /* --- זיקוקים --- */
+        /* --- מנוע זיקוקים מעודכן וללא החשכת מסך --- */
         let canvas, ctx, particles = [];
 
         function initFireworksCanvas() {
@@ -931,8 +941,8 @@
 
         function loopFireworks() {
             if (!canvas) return;
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // ניקוי הקנבס בצורה שקופה לחלוטין
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
