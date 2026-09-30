@@ -9,7 +9,7 @@
         
         body { background: #f8fafc; color: #0f172a; height: 100vh; overflow: hidden; position: relative; }
 
-        /* לוגו מוגדל בצד ימין למעלה */
+        /* לוגו בצד ימין למעלה */
         .school-logo {
             position: fixed;
             top: 15px;
@@ -17,7 +17,7 @@
             z-index: 1000;
         }
         .school-logo img {
-            height: 80px;
+            height: 70px;
             width: auto;
             object-fit: contain;
             filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.15));
@@ -27,16 +27,17 @@
         #student-view { 
             display: none; 
             height: 100vh; 
-            padding: 100px 15px 20px 15px; 
+            padding: 90px 15px 20px 15px; 
             flex-direction: column; 
             justify-content: center;
+            position: relative;
         }
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
             gap: 10px; 
             height: 100%;
-            max-height: calc(100vh - 120px);
+            max-height: calc(100vh - 110px);
         }
         .party-card { 
             background: #ffffff; 
@@ -56,6 +57,38 @@
         }
         .party-card:active { transform: scale(0.96); background: #2563eb; color: white; }
 
+        /* שכבת נעילת הצבעה לתלמיד */
+        #lock-overlay {
+            display: flex;
+            position: absolute;
+            inset: 0;
+            background: rgba(248, 250, 252, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .lock-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            color: #64748b;
+        }
+        .lock-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .lock-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+        }
+
         /* פופ-אפ אישור */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1100; backdrop-filter: blur(4px); }
         .modal-content { background: #ffffff; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 350px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
@@ -64,27 +97,75 @@
         .btn-cancel { background: #ef4444; color: white; }
 
         /* תצוגת מנהל */
-        #admin-view { display: none; height: 100vh; flex-direction: column; justify-content: space-between; padding: 100px 30px 40px 30px; text-align: center; align-items: center; }
-        .status-badge { font-size: 1.4rem; font-weight: 600; background: #e2e8f0; color: #334155; padding: 10px 30px; border-radius: 50px; display: inline-block; }
+        #admin-view { 
+            display: none; 
+            height: 100vh; 
+            flex-direction: column; 
+            justify-content: center; 
+            gap: 20px;
+            padding: 80px 30px 30px 30px; 
+            text-align: center; 
+            align-items: center; 
+        }
         
-        .box-container { position: relative; width: 320px; display: flex; flex-direction: column; align-items: center; }
+        /* מכלול מרכזי - תיבת קלפי וקוד QR בצדדים */
+        .admin-main-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 50px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .box-container { 
+            position: relative; 
+            width: 240px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+
+        /* קוד QR משמאל לקלפי */
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        .qr-image {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .qr-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #334155;
+        }
         
         .kalfi-image { 
-            width: 260px; 
+            width: 220px; 
             height: auto; 
             object-fit: contain; 
-            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.15));
+            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.12));
             position: relative;
             z-index: 2;
         }
 
+        /* מונה קולות נקי */
         .vote-counter-under {
-            margin-top: 15px;
-            background: #ffffff;
-            padding: 10px 30px;
-            border-radius: 16px;
-            border: 2px solid #cbd5e1;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            margin-top: 10px;
+            background: transparent;
+            padding: 5px;
+            border: none;
+            box-shadow: none;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -111,95 +192,150 @@
             100% { top: 60px; opacity: 0; transform: scale(0.4) rotate(0deg); }
         }
 
-        .timer-display { font-size: 2.2rem; color: #dc2626; font-weight: bold; height: 50px; }
+        .timer-display { font-size: 1.8rem; color: #dc2626; font-weight: bold; height: 35px; }
         
         /* אזור כפתורי מנהל */
-        .admin-actions { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; max-width: 400px; }
+        .admin-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 280px; }
         
         .btn-main-flow { 
             width: 100%;
-            padding: 18px 30px; 
-            font-size: 1.4rem; 
-            border-radius: 16px; 
-            border: none; 
+            padding: 10px 20px; 
+            font-size: 1.05rem; 
+            border-radius: 10px; 
+            border: 1px solid transparent; 
             cursor: pointer; 
-            font-weight: bold; 
-            color: white;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
+            font-weight: 600; 
+            transition: all 0.2s ease;
         }
-        .state-start { background: #22c55e; }
-        .state-start:hover { background: #16a34a; }
-        .state-stop { background: #eab308; color: #0f172a; }
-        .state-stop:hover { background: #ca8a04; }
-        .state-reveal { background: #8b5cf6; }
-        .state-reveal:hover { background: #7c3aed; }
+        .state-start { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+        .state-start:hover { background: #dcfce7; }
+        
+        .state-stop { background: #fefce8; color: #854d0e; border-color: #fef08a; }
+        .state-stop:hover { background: #fef9c3; }
+        
+        .state-reveal { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+        .state-reveal:hover { background: #e9d5ff; }
 
-        /* כפתורי המשנה ללא רקע */
-        .sub-actions-row { display: flex; gap: 15px; justify-content: center; align-items: center; }
+        .sub-actions-row { display: flex; gap: 12px; justify-content: center; align-items: center; }
         
         .btn-frameless { 
             background: transparent; 
             color: #64748b; 
             border: none; 
-            padding: 6px 12px; 
-            font-size: 0.9rem; 
-            font-weight: 600;
+            padding: 4px 8px; 
+            font-size: 0.85rem; 
+            font-weight: 500;
             cursor: pointer; 
             transition: all 0.2s;
             text-decoration: underline;
-            text-underline-offset: 4px;
+            text-underline-offset: 3px;
         }
         .btn-frameless:hover { color: #0284c7; }
         .btn-frameless-danger:hover { color: #dc2626; }
 
-        /* מסך תוצאות - מורחב ומתאים לעברית */
-        #results-screen { display: none; height: 100vh; padding: 90px 20px 20px 20px; flex-direction: column; align-items: center; }
+        /* מסך תוצאות */
+        #results-screen { 
+            display: none; 
+            height: 100vh; 
+            padding: 25px 30px 15px 30px; 
+            flex-direction: column; 
+            align-items: center; 
+            position: relative;
+        }
+
+        .btn-back-corner {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            transition: all 0.2s;
+            z-index: 100;
+        }
+        .btn-back-corner:hover { background: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
+
+        .results-header {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 15px;
+            align-self: flex-start;
+        }
+
         .horizontal-chart-container { 
             display: flex; 
             flex-direction: column; 
-            gap: 16px; 
-            width: 95%; 
-            max-width: 1100px; 
-            height: 72vh; 
-            overflow-y: auto; 
-            padding-left: 15px;
-            padding-right: 5px; 
+            justify-content: space-evenly; 
+            gap: 8px; 
+            width: 100%; 
+            max-width: 1200px; 
+            flex: 1; 
+            overflow: hidden; 
         }
         
-        .row-group { display: flex; align-items: center; gap: 20px; width: 100%; background: #ffffff; padding: 14px 22px; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .row-group { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            width: 100%; 
+            background: #ffffff; 
+            padding: 8px 16px; 
+            border-radius: 10px; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+            flex: 1;
+            max-height: 52px;
+        }
         
-        /* Label רחב שמתחיל מימין */
         .row-label { 
-            width: 240px; 
-            min-width: 240px; 
-            font-size: 1.2rem; 
-            font-weight: bold; 
+            width: 220px; 
+            min-width: 220px; 
+            font-size: 1.05rem; 
+            font-weight: 700; 
             text-align: right; 
             color: #0f172a; 
-            white-space: normal; 
-            word-break: break-word;
-            line-height: 1.2;
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
-        .row-bar-wrapper { flex: 1; display: flex; align-items: center; background: #f1f5f9; height: 36px; border-radius: 10px; overflow: hidden; position: relative; }
+        .row-bar-wrapper { flex: 1; display: flex; align-items: center; background: #f1f5f9; height: 28px; border-radius: 8px; overflow: hidden; position: relative; }
         
-        /* הוספנו משך זמן 3.6s (פי 3 מ-1.2s) */
         .row-bar { 
             height: 100%; 
             background: linear-gradient(90deg, #3b82f6, #1d4ed8); 
-            border-radius: 10px; 
+            border-radius: 8px; 
             transition: width 3.6s ease-out; 
             width: 0%; 
             min-width: 4px; 
         }
 
-        /* עקומת תנועה מהירה למקום 3 ו-4 בהתחלה */
         .row-bar-fast-start {
             transition: width 3.6s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
         }
 
-        .row-val { font-size: 1.3rem; font-weight: 900; width: 60px; text-align: left; color: #1d4ed8; }
+        .row-val { 
+            font-size: 1.15rem; 
+            font-weight: 800; 
+            width: 55px; 
+            text-align: left; 
+            color: #1d4ed8; 
+            opacity: 0; 
+            transition: opacity 0.4s ease-in;
+        }
+        .row-val.show-val {
+            opacity: 1;
+        }
 
         /* מסך ספירה לאחור */
         #countdown-overlay {
@@ -239,13 +375,22 @@
 </head>
 <body>
 
-    <!-- לוגו דרכא מוגדל -->
+    <!-- לוגו דרכא -->
     <div class="school-logo">
         <img src="logo.png" alt="תיכון דרכא למדעים ואמנויות ע&quot;ש מקסים לוי">
     </div>
 
     <!-- מסך תלמיד -->
     <div id="student-view">
+        <!-- מסך הנעילה המופיע כשההצבעה אינה פעילה -->
+        <div id="lock-overlay">
+            <svg class="lock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            <div class="lock-title">ההצבעה נעולה</div>
+            <div class="lock-subtitle">נא להמתין לפתיחת ההצבעה על ידי המנהל</div>
+        </div>
+
         <div class="grid-container" id="parties-grid"></div>
     </div>
 
@@ -261,23 +406,28 @@
 
     <!-- מסך מנהל -->
     <div id="admin-view">
-        <div class="status-badge" id="status-text">מצב הצבעה: סגור</div>
-        
-        <div class="box-container" id="box-container">
-            <img src="kalfi_tp.png" alt="קלפי" class="kalfi-image">
-            <div class="vote-counter-under">
-                <div class="vote-count" id="vote-count">0</div>
-                <div class="vote-label">קולות שנרשמו</div>
+        <div class="admin-main-container">
+            <!-- קוד QR לסריקה משמאל לקלפי -->
+            <div class="qr-container">
+                <img src="pollvibe_qr.png" alt="QR לסריקה" class="qr-image">
+                <div class="qr-label">סרק להצבעה 📱</div>
+            </div>
+
+            <!-- קלפי ומונה קולות -->
+            <div class="box-container" id="box-container">
+                <img src="kalfi_tp.jpeg" alt="קלפי" class="kalfi-image">
+                <div class="vote-counter-under">
+                    <div class="vote-count" id="vote-count">0</div>
+                    <div class="vote-label">קולות שנרשמו</div>
+                </div>
             </div>
         </div>
 
         <div class="timer-display" id="timer-display"></div>
 
         <div class="admin-actions">
-            <!-- כפתור ראשי אחד בולט -->
             <button class="btn-main-flow state-start" id="main-flow-btn" onclick="handleMainFlow()">התחל הצבעה</button>
             
-            <!-- שני כפתורים ללא רקע מתחת -->
             <div class="sub-actions-row">
                 <button class="btn-frameless" id="sim-btn" onclick="handleSimulation()">הפעל סימולציה (200 קולות)</button>
                 <span style="color: #cbd5e1;">|</span>
@@ -288,9 +438,9 @@
 
     <!-- מסך תוצאות -->
     <div id="results-screen">
-        <h1 style="font-size: 2.2rem; margin-bottom: 20px; color: #0f172a;">תוצאות הבחירות</h1>
+        <button class="btn-back-corner" onclick="location.reload()" title="חזרה למסך מנהל">←</button>
+        <div class="results-header">תוצאות הבחירות</div>
         <div class="horizontal-chart-container" id="chart-container"></div>
-        <button class="btn-main-flow state-start" style="margin-top: 20px; width: auto; font-size: 1.1rem; padding: 12px 30px;" onclick="location.reload()">חזרה למסך מנהל</button>
     </div>
 
     <!-- ספירה לאחור חווייתית -->
@@ -311,10 +461,8 @@
         let partiesData = [];
         let votesData = {};
 
-        // מעקב אחרי מצב הזרימה בממשק (start -> stop -> reveal)
         let hasVotedInSession = false;
 
-        // משתני סימולציה
         let simTimeout = null;
         let isSimulating = false;
         let simVotesCount = 0;
@@ -336,8 +484,12 @@
                 
                 if (data.state.totalVotes > 0) hasVotedInSession = true;
                 
-                if (!isAdmin) renderStudentGrid();
-                updateAdminUI(data.state.totalVotes);
+                if (!isAdmin) {
+                    renderStudentGrid();
+                    updateStudentLockState();
+                } else {
+                    updateAdminUI(data.state.totalVotes);
+                }
             }
 
             if (data.type === 'NEW_VOTE') {
@@ -351,7 +503,11 @@
 
             if (data.type === 'STATUS_CHANGE') {
                 currentStatus = data.status;
-                if (isAdmin) updateAdminUI();
+                if (isAdmin) {
+                    updateAdminUI();
+                } else {
+                    updateStudentLockState();
+                }
 
                 if (isSimulating && currentStatus === 'voting' && simVotesCount === 0) {
                     sendNextSimVote();
@@ -372,7 +528,7 @@
 
             if (data.type === 'VOTE_SUCCESS') {
                 if (!isSimulating) {
-                    document.getElementById('student-view').innerHTML = `<h1 style="text-align:center; margin-top:40vh; color:#22c55e;">תודתך נקלטה!<br>הצבעת ל-${data.party}</h1>`;
+                    document.getElementById('student-view').innerHTML = `<h1 style="text-align:center; margin-top:40vh; color:#22c55e;">תודתך נקלטה!<br>הצבעת ל-${cleanPartyName(data.party)}</h1>`;
                 }
             }
 
@@ -388,6 +544,24 @@
             }
         };
 
+        function updateStudentLockState() {
+            const lockOverlay = document.getElementById('lock-overlay');
+            if (!lockOverlay) return;
+
+            if (currentStatus === 'voting') {
+                lockOverlay.style.opacity = '0';
+                lockOverlay.style.visibility = 'hidden';
+            } else {
+                lockOverlay.style.opacity = '1';
+                lockOverlay.style.visibility = 'visible';
+            }
+        }
+
+        function cleanPartyName(fullName) {
+            if (!fullName) return '';
+            return fullName.split('-')[0].trim();
+        }
+
         function renderStudentGrid() {
             const grid = document.getElementById('parties-grid');
             grid.innerHTML = '';
@@ -398,7 +572,7 @@
             partiesData.forEach(party => {
                 const card = document.createElement('div');
                 card.className = 'party-card';
-                card.innerText = party;
+                card.innerText = cleanPartyName(party);
                 card.onclick = () => openModal(party);
                 grid.appendChild(card);
             });
@@ -406,7 +580,7 @@
 
         function openModal(party) {
             selectedParty = party;
-            document.getElementById('modal-text').innerText = `האם אתה בטוח שברצונך להצביע ל-${party}?`;
+            document.getElementById('modal-text').innerText = `האם אתה בטוח שברצונך להצביע ל-${cleanPartyName(party)}?`;
             document.getElementById('confirm-modal').style.display = 'flex';
         }
 
@@ -421,21 +595,15 @@
 
         function updateAdminUI(total) {
             const flowBtn = document.getElementById('main-flow-btn');
-            const statusText = document.getElementById('status-text');
 
             if (currentStatus === 'voting') {
-                statusText.innerText = "מצב הצבעה: אוסף קולות...";
                 flowBtn.innerText = "עצור הצבעה";
                 flowBtn.className = "btn-main-flow state-stop";
                 flowBtn.disabled = false;
             } else if (currentStatus === 'stopping') {
-                statusText.innerText = "מצב הצבעה: נסגר...";
                 flowBtn.innerText = "חכה לסגירה...";
                 flowBtn.disabled = true;
             } else if (currentStatus === 'closed') {
-                statusText.innerText = "מצב הצבעה: סגור";
-                
-                // רק אם בעבר כבר פתחו ועצרו/יש קולות - הכפתור הופך ל"חשוף תוצאות"
                 if (hasVotedInSession) {
                     flowBtn.innerText = "חשוף תוצאות 🚀";
                     flowBtn.className = "btn-main-flow state-reveal";
@@ -524,7 +692,7 @@
             const container = document.getElementById('box-container');
             const env = document.createElement('div');
             env.className = 'envelope';
-            env.style.left = (140 + (Math.random() * 40 - 20)) + 'px';
+            env.style.left = (100 + (Math.random() * 40 - 20)) + 'px';
             container.appendChild(env);
             setTimeout(() => env.remove(), 1100);
         }
@@ -575,24 +743,29 @@
                 const count = votesData[party] || 0;
                 const pct = (count / maxVotes) * 100;
 
-                // בדיקה האם מדובר במקום ה-3 או ה-4 (אינדקס 2 ו-3)
                 const isFastStart = (index === 2 || index === 3);
+                const displayPartyName = cleanPartyName(party);
 
                 const row = document.createElement('div');
                 row.className = 'row-group';
                 row.innerHTML = `
-                    <div class="row-label" title="${party}">${party}</div>
+                    <div class="row-label" title="${displayPartyName}">${displayPartyName}</div>
                     <div class="row-bar-wrapper">
                         <div class="row-bar ${isFastStart ? 'row-bar-fast-start' : ''}" style="width: 0%" id="bar-${encodeURIComponent(party)}"></div>
                     </div>
-                    <div class="row-val">${count}</div>
+                    <div class="row-val" id="val-${encodeURIComponent(party)}">${count}</div>
                 `;
                 container.appendChild(row);
 
                 setTimeout(() => {
-                    const el = document.getElementById(`bar-${encodeURIComponent(party)}`);
-                    if (el) el.style.width = pct + '%';
+                    const barEl = document.getElementById(`bar-${encodeURIComponent(party)}`);
+                    if (barEl) barEl.style.width = pct + '%';
                 }, 200);
+
+                setTimeout(() => {
+                    const valEl = document.getElementById(`val-${encodeURIComponent(party)}`);
+                    if (valEl) valEl.classList.add('show-val');
+                }, 3800);
             });
         }
 
