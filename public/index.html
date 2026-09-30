@@ -97,7 +97,7 @@
 </head>
 <body>
 
-    <!-- לוגו דרכא קבוע בכל המסכים בצד ימין למעלה -->
+    <!-- לוגו דרכא קבוע בצד ימין למעלה -->
     <div class="school-logo">
         <img src="logo.png" alt="לוגו דרכא" onerror="this.style.display='none'">
         <div class="school-logo-text">
@@ -162,7 +162,7 @@
         let votesData = {};
 
         // משתני סימולציה
-        let simInterval = null;
+        let simTimeout = null;
         let isSimulating = false;
         let simVotesCount = 0;
         const TARGET_SIM_VOTES = 200;
@@ -196,6 +196,11 @@
             if (data.type === 'STATUS_CHANGE') {
                 currentStatus = data.status;
                 if (isAdmin) updateAdminUI();
+
+                // אם הסימולציה מופעלת והמצב הפך ל-voting, נתחיל להזרים קולות
+                if (isSimulating && currentStatus === 'voting' && simVotesCount === 0) {
+                    sendNextSimVote();
+                }
             }
 
             if (data.type === 'START_COUNTDOWN') {
@@ -207,12 +212,15 @@
             }
 
             if (data.type === 'VOTE_SUCCESS') {
-                document.getElementById('student-view').innerHTML = `<h1 style="text-align:center; margin-top:40vh; color:#22c55e;">תודתך נקלטה!<br>הצבעת ל-${data.party}</h1>`;
+                if (!isSimulating) {
+                    document.getElementById('student-view').innerHTML = `<h1 style="text-align:center; margin-top:40vh; color:#22c55e;">תודתך נקלטה!<br>הצבעת ל-${data.party}</h1>`;
+                }
             }
 
             if (data.type === 'RESET_ALL') {
-                stopSimulationInternal();
-                location.reload();
+                votesData = {};
+                if (isAdmin) document.getElementById('vote-count').innerText = '0';
+                if (!isSimulating) location.reload();
             }
 
             if (data.type === 'ERROR') {
@@ -285,7 +293,7 @@
             }
         }
 
-        /* מנגנון סימולציה */
+        /* מנגנון סימולציה מתוקן ויציב */
         function handleSimulation() {
             if (isSimulating) {
                 stopSimulationInternal();
@@ -295,40 +303,44 @@
         }
 
         function startSimulationSequence() {
-            ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'RESET' }));
+            isSimulating = true;
+            simVotesCount = 0;
 
+            const simBtn = document.getElementById('sim-btn');
+            simBtn.innerText = "עצור סימולציה";
+            simBtn.className = "admin-btn btn-sim-active";
+
+            // איפוס והפעלה סדרתית
+            ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'RESET' }));
+            
             setTimeout(() => {
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'START' }));
+            }, 200);
+        }
 
-                isSimulating = true;
-                simVotesCount = 0;
+        function sendNextSimVote() {
+            if (!isSimulating || simVotesCount >= TARGET_SIM_VOTES) {
+                stopSimulationInternal();
+                return;
+            }
 
-                const simBtn = document.getElementById('sim-btn');
-                simBtn.innerText = "עצור סימולציה";
-                simBtn.className = "admin-btn btn-sim-active";
+            const randomParty = partiesData[Math.floor(Math.random() * partiesData.length)];
+            const fakeDeviceId = 'sim_dev_' + Math.random().toString(36).substr(2, 9) + '_' + simVotesCount;
 
-                simInterval = setInterval(() => {
-                    if (simVotesCount >= TARGET_SIM_VOTES) {
-                        stopSimulationInternal();
-                        return;
-                    }
+            ws.send(JSON.stringify({
+                type: 'VOTE',
+                party: randomParty,
+                deviceId: fakeDeviceId
+            }));
 
-                    const randomParty = partiesData[Math.floor(Math.random() * partiesData.length)];
-                    const fakeDeviceId = 'sim_dev_' + Math.random().toString(36).substr(2, 9);
+            simVotesCount++;
 
-                    ws.send(JSON.stringify({
-                        type: 'VOTE',
-                        party: randomParty,
-                        deviceId: fakeDeviceId
-                    }));
-
-                    simVotesCount++;
-                }, 180);
-            }, 300);
+            // שליחת הקול הבא תוך 100-250 מילי-שניות
+            simTimeout = setTimeout(sendNextSimVote, 100 + Math.random() * 150);
         }
 
         function stopSimulationInternal() {
-            if (simInterval) clearInterval(simInterval);
+            if (simTimeout) clearTimeout(simTimeout);
             isSimulating = false;
             
             const simBtn = document.getElementById('sim-btn');
