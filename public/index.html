@@ -114,23 +114,26 @@
             justify-content: center;
         }
 
+        /* אזור ברקוד שקוף ללא רקע לבן או מסגרת */
         .qr-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            padding: 20px;
-            border-radius: 24px;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
             width: 300px;
             height: 300px;
         }
         .qr-image {
-            width: 200px;
-            height: 200px;
+            width: 220px;
+            height: 220px;
             object-fit: contain;
+            filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.04));
         }
         .qr-label {
             font-size: 1.05rem;
@@ -181,7 +184,6 @@
             z-index: 1; 
             animation: dropIntoKalfi 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
         }
-        /* דש מעטפה מעוצב באייקון CSS */
         .envelope::before {
             content: '';
             position: absolute;
@@ -413,14 +415,14 @@
             <h3 style="color: #0f172a;">אישור הצבעה</h3>
             <p id="modal-text" style="margin: 15px 0; font-size: 1.2rem; color: #475569;"></p>
             <button class="btn btn-confirm" onclick="submitVote()">אישור והצבעה</button>
-            <button class="btn btn-cancel" onclick="closeModal()">שינויבחירה</button>
+            <button class="btn btn-cancel" onclick="closeModal()">שינוי בחירה</button>
         </div>
     </div>
 
     <!-- מסך מנהל / צופים -->
     <div id="admin-view">
         <div class="admin-main-container">
-            <!-- קוד QR -->
+            <!-- קוד QR שקוף בלבד -->
             <div class="qr-container">
                 <img src="pollvibe_qr.png" alt="QR לסריקה" class="qr-image">
                 <div class="qr-label">סרק להצבעה 📱</div>
@@ -440,7 +442,7 @@
 
         <div class="timer-display" id="timer-display"></div>
 
-        <!-- כפתורי ניהול מוצנעים אפורים בצד שמאל למטה -->
+        <!-- כפתורי ניהול מוצנעים בצד שמאל למטה -->
         <div class="stealth-admin-panel">
             <!-- כפתור עליון: פליי / סטופ / עין -->
             <button class="stealth-btn" id="stealth-main-btn" onclick="handleMainFlow()" title="ניהול הצבעה">
@@ -618,7 +620,6 @@
             ws.send(JSON.stringify({ type: 'VOTE', party: selectedParty, deviceId }));
         }
 
-        /* עדכון אייקון הכפתור הראשי בלבד */
         function updateAdminUI(total) {
             const iconPlay = document.getElementById('icon-play');
             const iconStop = document.getElementById('icon-stop');
@@ -701,12 +702,10 @@
             isSimulating = false;
         }
 
-        /* יצירת מעטפה עם פיזור נחיתה רחב */
         function spawnEnvelope() {
             const container = document.getElementById('box-container');
             const env = document.createElement('div');
             env.className = 'envelope';
-            // פיזור רחב יותר ממעל התיבה (-60px עד +60px)
             const randomOffset = (Math.random() * 120) - 60;
             env.style.left = (125 + randomOffset) + 'px';
             container.appendChild(env);
