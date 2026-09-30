@@ -3,551 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PollVibe - סקר בחירות בלייב</title>
+    <title>סימולטור בחירות 2026</title>
+    <!-- Chart.js לרשת הדיאגרמות -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Canvas Confetti לאפקט הזיקוקים -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; user-select: none; }
-        
-        body { background: #e2e8f0; color: #0f172a; height: 100vh; overflow: hidden; position: relative; }
-
-        /* לוגו בצד ימין למעלה */
-        .school-logo {
-            position: fixed;
-            top: 15px;
-            right: 20px;
-            z-index: 1000;
-        }
-        .school-logo img {
-            height: 60px;
-            width: auto;
-            object-fit: contain;
-            filter: drop-shadow(0px 2px 8px rgba(0,0,0,0.1));
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --paper: #fefec8;
+            --paper-shadow: #e2e2a4;
         }
 
-        /* תצוגת נייד (תלמיד) */
-        #student-view { 
-            display: none; 
-            height: 100vh; 
-            padding: 85px 12px 15px 12px; 
-            flex-direction: column; 
-            justify-content: center;
-            position: relative;
-        }
-        
-        /* גריד פתקיות הצבעה */
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; 
-            height: 100%;
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
-            padding: 5px;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* עיצוב פתקית הצבעה (כמו בקלפי) */
-        .ballot-paper { 
-            background: #ffffff; 
-            border: 1px solid #cbd5e1; 
-            border-radius: 4px; 
-            padding: 12px 8px; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: space-between; 
-            text-align: center; 
-            color: #000000; 
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08), inset 0 0 12px rgba(0,0,0,0.02);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            min-height: 140px;
-        }
-        .ballot-paper:active { 
-            transform: scale(0.96); 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-        }
-
-        .ballot-letters {
-            font-size: 2.4rem;
-            font-weight: 900;
-            letter-spacing: -1px;
-            line-height: 1.1;
-            color: #000000;
-            margin-top: 5px;
-        }
-
-        .ballot-subtext {
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: #1e293b;
-            line-height: 1.2;
-            margin-bottom: 5px;
-        }
-
-        /* נעילת תלמיד */
-        #lock-overlay {
+        body {
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
-            position: absolute;
-            inset: 0;
-            background: rgba(248, 250, 252, 0.96);
-            backdrop-filter: blur(8px);
-            z-index: 500;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
             text-align: center;
-            padding: 20px;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .lock-icon { width: 80px; height: 80px; margin-bottom: 20px; color: #64748b; }
-        .lock-title { font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
-        .lock-subtitle { font-size: 1rem; color: #64748b; }
-
-        /* פופ-אפ אישור הצבעה מוגדל */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); align-items: center; justify-content: center; z-index: 1100; backdrop-filter: blur(6px); }
-        .modal-content { 
-            background: #f8fafc; 
-            padding: 25px 20px; 
-            border-radius: 16px; 
-            text-align: center; 
-            width: 90%; 
-            max-width: 380px; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        /* פתק ענק בחלון האישור */
-        .large-ballot {
-            background: #ffffff;
-            width: 220px;
-            height: 310px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 25px 15px;
-            margin: 15px 0 20px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
-        }
-        .large-ballot .large-letters {
-            font-size: 4.8rem;
-            font-weight: 900;
-            color: #000;
-            line-height: 1;
-            margin-top: 20px;
-        }
-        .large-ballot .large-subtext {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1e293b;
-            line-height: 1.3;
-            margin-bottom: 10px;
-        }
-
-        .modal-buttons { display: flex; gap: 10px; width: 100%; justify-content: center; }
-        .btn { padding: 14px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 1.05rem; flex: 1; }
-        .btn-confirm { background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
-        .btn-cancel { background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
-
-        /* === תצוגת מנהל / צופים === */
-        #admin-view { 
-            display: none; 
-            height: 100vh; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center;
-            gap: 25px;
-            padding: 40px 20px; 
-            position: relative;
-        }
-        
-        .admin-main-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 70px;
-            width: 100%;
-            max-width: 950px;
-        }
-
-        .box-container { 
-            position: relative; 
-            width: 300px;
-            height: 300px;
-            display: flex; 
-            align-items: center;
-            justify-content: center;
-        }
-
-        .qr-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            width: 300px;
-            height: 300px;
-        }
-        .qr-image {
-            width: 220px;
-            height: 220px;
-            object-fit: contain;
-            filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.04));
-        }
-        .qr-label {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #475569;
-        }
-        
-        .kalfi-image { 
-            width: 290px; 
-            height: auto; 
-            object-fit: contain; 
-            filter: drop-shadow(0px 12px 24px rgba(0, 0, 0, 0.12));
-            position: relative;
-            z-index: 2;
-        }
-
-        .vote-counter-under {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 5px;
-        }
-        .vote-count { 
-            font-size: 4.5rem; 
-            font-weight: 900; 
-            color: #2563eb; 
-            line-height: 1; 
-            letter-spacing: -1px;
-        }
-        .vote-label { 
-            font-size: 1.15rem; 
-            color: #64748b; 
-            margin-top: 6px; 
-            font-weight: 600; 
-        }
-
-        /* מעטפות נופלות לקלפי */
-        .envelope { 
-            position: absolute; 
-            width: 50px; 
-            height: 32px; 
-            background: #ffffff; 
-            border: 1px solid #cbd5e1;
-            border-radius: 4px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            top: -120px; 
-            z-index: 1; 
-            animation: dropIntoKalfi 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
-        }
-        .envelope::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            border-left: 25px solid transparent;
-            border-right: 25px solid transparent;
-            border-top: 18px solid #f1f5f9;
-        }
-
-        @keyframes dropIntoKalfi {
-            0% { top: -120px; opacity: 0; transform: scale(1.1) rotate(-15deg); }
-            20% { opacity: 1; }
-            85% { top: 40px; opacity: 1; transform: scale(0.9) rotate(5deg); }
-            100% { top: 75px; opacity: 0; transform: scale(0.3) rotate(0deg); }
-        }
-        
-        .stealth-admin-panel {
-            position: fixed;
-            bottom: 25px;
-            left: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 900;
-        }
-
-        .stealth-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid #e2e8f0;
-            color: #94a3b8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            backdrop-filter: blur(4px);
-        }
-
-        .stealth-btn:hover {
-            background: #ffffff;
-            color: #334155;
-            border-color: #cbd5e1;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transform: scale(1.05);
-        }
-
-        .stealth-btn svg { width: 20px; height: 20px; fill: currentColor; }
-
-        /* מסך תוצאות */
-        #results-screen { 
-            display: none; 
-            height: 100vh; 
-            padding: 25px 30px 15px 30px; 
-            flex-direction: column; 
-            align-items: center; 
-            position: relative;
-        }
-
-        .btn-back-corner {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            color: #334155;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
             z-index: 100;
         }
-        .btn-back-corner:hover { background: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
 
-        .results-header {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 15px;
-            align-self: flex-start;
-        }
+        h1 { font-size: 1.5rem; margin-bottom: 0.2rem; }
+        p.subtitle { font-size: 0.85rem; opacity: 0.8; }
 
-        .horizontal-chart-container { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-evenly; 
-            gap: 8px; 
-            width: 100%; 
-            max-width: 1200px; 
-            flex: 1; 
-            overflow: hidden; 
-        }
-        
-        .row-group { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            width: 100%; 
-            background: #ffffff; 
-            padding: 8px 16px; 
-            border-radius: 10px; 
-            border: 1px solid #e2e8f0; 
-            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+        .container {
             flex: 1;
-            max-height: 52px;
-        }
-        
-        .row-label { 
-            width: 220px; 
-            min-width: 220px; 
-            font-size: 1.05rem; 
-            font-weight: 700; 
-            text-align: right; 
-            color: #0f172a; 
-            white-space: nowrap; 
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .row-bar-wrapper { flex: 1; display: flex; align-items: center; background: #f1f5f9; height: 28px; border-radius: 8px; overflow: hidden; position: relative; }
-        
-        .row-bar { 
-            height: 100%; 
-            background: linear-gradient(90deg, #3b82f6, #1d4ed8); 
-            border-radius: 8px; 
-            transition: width 3.6s ease-out; 
-            width: 0%; 
-            min-width: 4px; 
-        }
-
-        .row-bar-fast-start { transition: width 3.6s cubic-bezier(0.1, 0.9, 0.2, 1) !important; }
-
-        .row-val { 
-            font-size: 1.15rem; 
-            font-weight: 800; 
-            width: 55px; 
-            text-align: left; 
-            color: #1d4ed8; 
-            opacity: 0; 
-            transition: opacity 0.4s ease-in;
-        }
-        .row-val.show-val { opacity: 1; }
-
-        /* מסך מעבר/ספירה לאחור של חשיפת תוצאות */
-        #countdown-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: #0f172a;
-            z-index: 2000;
+            display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            padding: 20px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
         }
-        
-        #fireworks-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2000; }
 
-        .intro-phrase {
-            font-size: 4.5rem;
-            font-weight: 900;
-            color: #ffffff;
+        /* סגנונות מסך תלמיד */
+        #student-view {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-bottom: 90px !important; /* מרווח תחתון נדיב למניעת חיתוך הפתקיות */
+        }
+
+        .instruction-box {
+            background-color: #dbeafe;
+            border-right: 4px solid var(--primary-light);
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+            padding-bottom: 20px;
+        }
+
+        .party-card {
+            background-color: var(--paper);
+            border: 1px solid var(--paper-shadow);
+            border-radius: 4px;
+            aspect-ratio: 3 / 4;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0.75rem;
+            cursor: pointer;
+            box-shadow: 2px 3px 5px rgba(0,0,0,0.08);
+            transition: transform 0.15s, box-shadow 0.15s;
+            position: relative;
+            user-select: none;
+        }
+
+        .party-card:active {
+            transform: scale(0.96);
+        }
+
+        .party-card .letters {
+            font-size: 2.2rem;
+            font-weight: bold;
             text-align: center;
-            text-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-            z-index: 2001;
-            line-height: 1.2;
-            animation: zoomAndFade 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            margin-top: auto;
+            margin-bottom: auto;
+            color: #000;
+            line-height: 1;
         }
 
-        @keyframes zoomAndFade {
-            0% { transform: scale(0.6); opacity: 0; }
-            20% { transform: scale(1); opacity: 1; }
-            75% { transform: scale(1.08); opacity: 1; }
-            100% { transform: scale(1.25); opacity: 0; }
+        .party-card .full-name {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #333;
+            line-height: 1.1;
+            max-height: 2.4em;
+            overflow: hidden;
         }
 
-        /* האנימציה החדשה: גדילה רציפה והתפוצצות בסוף */
+        /* מודאל פתק מוזן */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background-color: var(--paper);
+            width: 80%;
+            max-width: 300px;
+            aspect-ratio: 3/4;
+            padding: 1.5rem;
+            border-radius: 6px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            transform: scale(0.8);
+            transition: transform 0.2s ease;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-card .letters { font-size: 4rem; font-weight: bold; }
+        .modal-card .full-name { font-size: 1.1rem; text-align: center; font-weight: 500; }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-confirm { background-color: #16a34a; color: white; }
+        .btn-cancel { background-color: #dc2626; color: white; }
+
+        /* ספירה לאחור מעוצבת */
+        .countdown-overlay {
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            color: white;
+        }
+
         .countdown-number {
-            font-size: 14rem;
+            font-size: 10rem;
             font-weight: 900;
-            color: #ffffff;
-            text-shadow: 0 0 40px rgba(59, 130, 246, 0.9);
-            z-index: 2001;
-            animation: growAndExplode 1s ease-in forwards;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+            animation: growAndPop 1s infinite linear;
         }
 
-        @keyframes growAndExplode {
-            0% {
-                transform: scale(0.3);
-                opacity: 0.2;
-            }
-            85% {
-                transform: scale(1.6);
-                opacity: 1;
-            }
-            95% {
-                transform: scale(1.9);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(2.4);
-                opacity: 0;
-            }
+        @keyframes growAndPop {
+            0% { transform: scale(0.5); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 1; }
+            90% { transform: scale(1.6); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* סגנונות מסך מנהל */
+        #admin-view {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .admin-controls {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-card .val {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-card .lbl { font-size: 0.85rem; color: #64748b; }
+
+        .chart-container {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+            min-height: 350px;
+        }
+
+        /* בקרות ניהול בתחתית */
+        .admin-toggle {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            opacity: 0.6;
+            z-index: 100;
+        }
+        .admin-toggle:hover { opacity: 1; }
+
+        .vote-success-msg {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #16a34a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1500;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- לוגו -->
-    <div class="school-logo">
-        <img src="logo.png" alt="תיכון דרכא">
-    </div>
+    <header>
+        <h1>סימולטור בחירות לכנסת ה-26</h1>
+        <p class="subtitle">הצבעה קלפית מתוקשבת</p>
+    </header>
 
-    <!-- מסך תלמיד -->
-    <div id="student-view">
-        <div id="lock-overlay">
-            <svg class="lock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-            </svg>
-            <div class="lock-title">ההצבעה נעולה</div>
-            <div class="lock-subtitle">נא להמתין לפתיחת ההצבעה על ידי המנהל</div>
-        </div>
-
-        <div class="grid-container" id="parties-grid"></div>
-    </div>
-
-    <!-- פופ אפ אישור תלמיד (פתק מוגדל) -->
-    <div class="modal" id="confirm-modal">
-        <div class="modal-content">
-            <h3 style="color: #0f172a; font-size: 1.3rem;">אישור בחירה</h3>
-            <p style="color: #64748b; font-size: 0.95rem; margin-top: 4px;">זהו הפתק שייכנס למעטפה:</p>
-            
-            <div class="large-ballot">
-                <div class="large-letters" id="modal-letters">מחל</div>
-                <div class="large-subtext" id="modal-subtext">הליכוד בהנהגת בנימין נתניהו לראשות הממשלה</div>
+    <div class="container">
+        
+        <!-- תצוגת תלמיד -->
+        <div id="student-view">
+            <div class="instruction-box">
+                בחר את הפתק הרצוי בלחיצה. לאחר מכן תוכל לאשר את בחירתך.
             </div>
 
+            <div class="grid-container" id="parties-grid">
+                <!-- הפתקיות ייטענו דינמית -->
+            </div>
+        </div>
+
+        <!-- תצוגת מנהל / תוצאות -->
+        <div id="admin-view">
+            <div class="admin-controls">
+                <h2>לוח תוצאות וניהול</h2>
+                <div>
+                    <button class="btn btn-confirm" style="width: auto; padding: 6px 12px;" onclick="exportData()">ייצוא CSV</button>
+                    <button class="btn btn-cancel" style="width: auto; padding: 6px 12px;" onclick="resetVotes()">איפוס נתונים</button>
+                </div>
+            </div>
+
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="val" id="total-votes">0</div>
+                    <div class="lbl">סה"כ מצביעים</div>
+                </div>
+                <div class="stat-card">
+                    <div class="val" id="leading-party">-</div>
+                    <div class="lbl">המפלגה המובילה</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="resultsChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- מודאל אישור פתק -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class="modal-card">
+                <div class="letters" id="modal-letters">מחל</div>
+                <div class="full-name" id="modal-name">שם המפלגה</div>
+            </div>
             <div class="modal-buttons">
-                <button class="btn btn-confirm" onclick="submitVote()">אישור והצבעה</button>
-                <button class="btn btn-cancel" onclick="closeModal()">חזרה לבחירה</button>
+                <button class="btn btn-confirm" onclick="submitVote()">שלשל לקלפי</button>
+                <button class="btn btn-cancel" onclick="closeModal()">ביטול</button>
             </div>
         </div>
     </div>
 
-    <!-- מסך מנהל / צופים -->
-    <div id="admin-view">
-        <div class="admin-main-container">
-            <div class="qr-container">
-                <div class="qr-label">סירקו להצבעה</div>
-                <img src="pollvibe_qr.png" alt="QR לסריקה" class="qr-image">
-            </div>
-
-            <div class="box-container" id="box-container">
-                <img src="kalfi_tp.png" alt="קלפי" class="kalfi-image">
-            </div>
-        </div>
-
-        <div class="vote-counter-under">
-            <div class="vote-count" id="vote-count">0</div>
-            <div class="vote-label">תלמידים הצביעו</div>
-        </div>
-
-        <div class="stealth-admin-panel">
-            <button class="stealth-btn" id="stealth-main-btn" onclick="handleMainFlow()" title="ניהול הצבעה">
-                <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                <svg id="icon-stop" viewBox="0 0 24 24" style="display:none;"><path d="M6 6h12v12H6z"/></svg>
-                <svg id="icon-eye" viewBox="0 0 24 24" style="display:none;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            </button>
-
-            <button class="stealth-btn" id="stealth-sim-btn" onclick="handleSimulation()" title="סימולציה">
-                <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 012 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 017 7h1a1 1 0 011 1v3a1 1 0 01-1 1h-1v1a2 2 0 01-2 2H5a2 2 0 01-2-2v-1H2a1 1 0 01-1-1v-3a1 1 0 011-1h1a7 7 0 017-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 012-2M7.5 13A1.5 1.5 0 006 14.5 1.5 1.5 0 007.5 16 1.5 1.5 0 009 14.5 1.5 1.5 0 007.5 13m9 0a1.5 1.5 0 00-1.5 1.5 1.5 1.5 0 001.5 1.5 1.5 1.5 0 001.5-1.5 1.5 1.5 0 00-1.5-1.5M9 18v1h6v-1H9z"/></svg>
-            </button>
-
-            <button class="stealth-btn" onclick="resetVoting()" title="איפוס נתונים">
-                <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-            </button>
-        </div>
+    <!-- שכבת ספירה לאחור -->
+    <div class="countdown-overlay" id="countdown-modal" style="display: none;">
+        <h2 style="margin-bottom: 20px;">ההצבעה נקלטה!</h2>
+        <div class="countdown-number" id="countdown-timer">3</div>
+        <p style="margin-top: 20px; font-size: 1.2rem;">מעביר למצביע הבא...</p>
     </div>
 
-    <!-- מסך תוצאות -->
-    <div id="results-screen">
-        <button class="btn-back-corner" onclick="location.reload()" title="חזרה למסך מנהל">←</button>
-        <div class="results-header">תוצאות הבחירות</div>
-        <div class="horizontal-chart-container" id="chart-container"></div>
-    </div>
+    <!-- הודעת הצלחה קצרה -->
+    <div class="vote-success-msg" id="success-msg">הצבעתך נרשמה בהצלחה!</div>
 
-    <!-- מסך מעבר חשיפה לקראת התוצאות -->
-    <div id="countdown-overlay">
-        <canvas id="fireworks-canvas"></canvas>
-        <div id="countdown-num-box"></div>
-    </div>
+    <!-- כפתור מעבר מנהל -->
+    <button class="admin-toggle" onclick="toggleAdminView()">מצב מנהל / תוצאות</button>
 
     <script>
+        // רשימת המפלגות המעודכנת לבחירות 2026 כולל הרשימות הערביות המרכזיות
         const MAIN_PARTIES = [
             { letters: 'מחל', name: 'הליכוד בהנהגת בנימין נתניהו לראשות הממשלה' },
             { letters: 'רק', name: 'ביחד בראשות נפתלי בנט' },
@@ -559,397 +385,213 @@
             { letters: 'ב', name: 'עוצמה יהודית בראשות איתמר בן גביר' },
             { letters: 'ל', name: 'ישראל ביתנו בראשות אביגדור ליברמן' },
             { letters: 'עם', name: 'רע"ם - הרשימה הערבית המאוחדת' },
-            { letters: 'ודם', name: 'הרשימה המשותפת' },
+            { letters: 'ודם', name: 'הרשימה המשותפת (חד"ש, תע"ל, בל"ד)' },
             { letters: 'דרך', name: 'בראשות גדי איזנקוט' },
             { letters: 'ך', name: 'עמך ישראל בראשות עופר וינטר' },
             { letters: 'ני', name: 'נעם לישראל למען עתיד הילדים בראשות אבי מעוז' }
         ];
 
-        const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
-        
-        let deviceId = localStorage.getItem('poll_device_id') || 'dev_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('poll_device_id', deviceId);
+        let selectedParty = null;
+        let votes = {};
+        let myChart = null;
 
-        let selectedPartyObj = null;
-        let isAdmin = location.pathname.includes('/admin-control-x9z87');
-        let currentStatus = 'closed';
-        let votesData = {};
-
-        let hasVotedInSession = false;
-
-        let simTimeout = null;
-        let isSimulating = false;
-        let simVotesCount = 0;
-        const TARGET_SIM_VOTES = 200;
-
-        if (isAdmin) {
-            document.getElementById('admin-view').style.display = 'flex';
-        } else {
-            document.getElementById('student-view').style.display = 'flex';
-        }
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-
-            if (data.type === 'INIT') {
-                votesData = data.state.votes || {};
-                currentStatus = data.state.status;
-                
-                if (data.state.totalVotes > 0) hasVotedInSession = true;
-                
-                if (!isAdmin) {
-                    renderStudentGrid();
-                    updateStudentLockState();
-                } else {
-                    updateAdminUI(data.state.totalVotes);
-                }
-            }
-
-            if (data.type === 'NEW_VOTE') {
-                votesData[data.party] = (votesData[data.party] || 0) + 1;
-                hasVotedInSession = true;
-                if (isAdmin) {
-                    document.getElementById('vote-count').innerText = data.totalVotes;
-                    spawnEnvelope();
-                }
-            }
-
-            if (data.type === 'STATUS_CHANGE') {
-                currentStatus = data.status;
-                if (isAdmin) {
-                    updateAdminUI();
-                } else {
-                    updateStudentLockState();
-                }
-
-                if (isSimulating && currentStatus === 'voting' && simVotesCount === 0) {
-                    sendNextSimVote();
-                }
-            }
-
-            if (data.type === 'VOTE_SUCCESS') {
-                if (!isSimulating) {
-                    document.getElementById('student-view').innerHTML = `
-                        <div style="text-align:center; margin-top:30vh; padding: 20px;">
-                            <h1 style="color:#16a34a; font-size:2.2rem; margin-bottom:15px;">הצבעתך נקלטה בהצלחה!</h1>
-                            <p style="color:#475569; font-size:1.2rem;">תודה על השתתפותך במדגם.</p>
-                        </div>`;
-                }
-            }
-
-            if (data.type === 'RESET_ALL') {
-                votesData = {};
-                hasVotedInSession = false;
-                if (isAdmin) document.getElementById('vote-count').innerText = '0';
-                if (!isSimulating) location.reload();
-            }
-
-            if (data.type === 'ERROR') {
-                if (!isSimulating) alert(data.message);
-            }
-        };
-
-        function updateStudentLockState() {
-            const lockOverlay = document.getElementById('lock-overlay');
-            if (!lockOverlay) return;
-
-            if (currentStatus === 'voting') {
-                lockOverlay.style.opacity = '0';
-                lockOverlay.style.visibility = 'hidden';
+        // טעינת נתונים מ-LocalStorage
+        function loadVotes() {
+            const saved = localStorage.getItem('knesset_votes_2026');
+            if (saved) {
+                votes = JSON.parse(saved);
             } else {
-                lockOverlay.style.opacity = '1';
-                lockOverlay.style.visibility = 'visible';
+                votes = {};
+                MAIN_PARTIES.forEach(p => votes[p.letters] = 0);
             }
         }
 
-        /* רינדור פתקיות ההצבעה לתלמיד */
-        function renderStudentGrid() {
-            const grid = document.getElementById('parties-grid');
-            grid.innerHTML = '';
+        function saveVotes() {
+            localStorage.setItem('knesset_votes_2026', JSON.stringify(votes));
+        }
 
+        // רינדור הכרטיסים
+        function renderCards() {
+            const container = document.getElementById('parties-grid');
+            container.innerHTML = '';
+            
             MAIN_PARTIES.forEach(party => {
-                const paper = document.createElement('div');
-                paper.className = 'ballot-paper';
-                paper.innerHTML = `
-                    <div class="ballot-letters">${party.letters}</div>
-                    <div class="ballot-subtext">${party.name}</div>
+                const card = document.createElement('div');
+                card.className = 'party-card';
+                card.onclick = () => selectParty(party);
+                
+                card.innerHTML = `
+                    <div class="letters">${party.letters}</div>
+                    <div class="full-name">${party.name}</div>
                 `;
-                paper.onclick = () => openModal(party);
-                grid.appendChild(paper);
+                container.appendChild(card);
             });
         }
 
-        /* פתיחת חלון אישור פתק מוגדל */
-        function openModal(party) {
-            selectedPartyObj = party;
+        function selectParty(party) {
+            selectedParty = party;
             document.getElementById('modal-letters').innerText = party.letters;
-            document.getElementById('modal-subtext').innerText = party.name;
-            document.getElementById('confirm-modal').style.display = 'flex';
+            document.getElementById('modal-name').innerText = party.name;
+            document.getElementById('confirm-modal').classList.add('active');
         }
 
         function closeModal() {
-            document.getElementById('confirm-modal').style.display = 'none';
+            document.getElementById('confirm-modal').classList.remove('active');
+            selectedParty = null;
         }
 
         function submitVote() {
+            if (!selectedParty) return;
+
+            // רישום ההצבעה
+            const code = selectedParty.letters;
+            votes[code] = (votes[code] || 0) + 1;
+            saveVotes();
+
             closeModal();
-            const partyIdentifier = `${selectedPartyObj.letters} - ${selectedPartyObj.name}`;
-            ws.send(JSON.stringify({ type: 'VOTE', party: partyIdentifier, deviceId }));
+            startCountdown();
         }
 
-        function updateAdminUI(total) {
-            const iconPlay = document.getElementById('icon-play');
-            const iconStop = document.getElementById('icon-stop');
-            const iconEye = document.getElementById('icon-eye');
+        // אפקט ספירה לאחור עם זיקוקים
+        function startCountdown() {
+            const overlay = document.getElementById('countdown-modal');
+            const timerEl = document.getElementById('countdown-timer');
+            let count = 3;
 
-            iconPlay.style.display = 'none';
-            iconStop.style.display = 'none';
-            iconEye.style.display = 'none';
-
-            if (currentStatus === 'voting') {
-                iconStop.style.display = 'block';
-            } else if (currentStatus === 'closed') {
-                if (hasVotedInSession) {
-                    iconEye.style.display = 'block';
-                } else {
-                    iconPlay.style.display = 'block';
-                }
-            }
-        }
-
-        function handleMainFlow() {
-            if (currentStatus === 'closed' && !hasVotedInSession) {
-                if (isSimulating) stopSimulationInternal();
-                ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'START' }));
-            } else if (currentStatus === 'voting') {
-                if (isSimulating) stopSimulationInternal();
-                ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'STOP' }));
-            } else if (currentStatus === 'closed' && hasVotedInSession) {
-                startGrandCountdown();
-            }
-        }
-
-        function resetVoting() {
-            stopSimulationInternal();
-            if (confirm("האם אתה בטוח שברצונך למחוק את כל הקולות?")) {
-                ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'RESET' }));
-            }
-        }
-
-        function handleSimulation() {
-            if (isSimulating) {
-                stopSimulationInternal();
-            } else {
-                startSimulationSequence();
-            }
-        }
-
-        function startSimulationSequence() {
-            isSimulating = true;
-            simVotesCount = 0;
-
-            ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'RESET' }));
-            
-            setTimeout(() => {
-                ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'START' }));
-            }, 200);
-        }
-
-        function sendNextSimVote() {
-            if (!isSimulating || simVotesCount >= TARGET_SIM_VOTES) {
-                stopSimulationInternal();
-                return;
-            }
-
-            const randomPartyObj = MAIN_PARTIES[Math.floor(Math.random() * MAIN_PARTIES.length)];
-            const partyIdentifier = `${randomPartyObj.letters} - ${randomPartyObj.name}`;
-            const fakeDeviceId = 'sim_dev_' + Math.random().toString(36).substr(2, 9) + '_' + simVotesCount;
-
-            ws.send(JSON.stringify({
-                type: 'VOTE',
-                party: partyIdentifier,
-                deviceId: fakeDeviceId
-            }));
-
-            simVotesCount++;
-            simTimeout = setTimeout(sendNextSimVote, 80 + Math.random() * 120);
-        }
-
-        function stopSimulationInternal() {
-            if (simTimeout) clearTimeout(simTimeout);
-            isSimulating = false;
-        }
-
-        function spawnEnvelope() {
-            const container = document.getElementById('box-container');
-            const env = document.createElement('div');
-            env.className = 'envelope';
-            const randomOffset = (Math.random() * 120) - 60;
-            env.style.left = (125 + randomOffset) + 'px';
-            container.appendChild(env);
-            setTimeout(() => env.remove(), 1200);
-        }
-
-        /* --- מעבר ספירה לאחור וחשיפת התוצאות --- */
-        function startGrandCountdown() {
-            if (isSimulating) stopSimulationInternal();
-
-            const overlay = document.getElementById('countdown-overlay');
-            const numBox = document.getElementById('countdown-num-box');
             overlay.style.display = 'flex';
+            timerEl.innerText = count;
 
-            const phrases = [
-                "מדגם בחירות 2026",
-                "תלמידי התיכונים בלוד",
-                "המדגם הכי מייצג",
-                "כמעט..."
-            ];
+            triggerFireworks();
 
-            let phraseIdx = 0;
-
-            function showNextPhrase() {
-                if (phraseIdx < phrases.length) {
-                    numBox.innerHTML = `<div class="intro-phrase" key="${phraseIdx}">${phrases[phraseIdx]}</div>`;
-                    phraseIdx++;
-                    setTimeout(showNextPhrase, 3000);
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    timerEl.innerText = count;
+                    triggerFireworks();
                 } else {
-                    initFireworksCanvas();
-                    startNumbersCountdown();
+                    clearInterval(interval);
+                    overlay.style.display = 'none';
+                    showSuccessToast();
                 }
-            }
-
-            function startNumbersCountdown() {
-                let count = 5;
-
-                function step() {
-                    if (count > 0) {
-                        numBox.innerHTML = `<div class="countdown-number" key="c-${count}">${count}</div>`;
-                        
-                        // פיצוץ זיקוקים בדיוק בשיא הגדילה (בסוף השנייה)
-                        setTimeout(() => {
-                            createFireworkExplosion();
-                        }, 850);
-
-                        count--;
-                        setTimeout(step, 1000);
-                    } else {
-                        overlay.style.display = 'none';
-                        showResults();
-                    }
-                }
-
-                step();
-            }
-
-            showNextPhrase();
+            }, 1000);
         }
 
-        function showResults() {
-            document.getElementById('admin-view').style.display = 'none';
-            document.getElementById('results-screen').style.display = 'flex';
-
-            const container = document.getElementById('chart-container');
-            container.innerHTML = '';
-
-            let allPartyKeys = MAIN_PARTIES.map(p => `${p.letters} - ${p.name}`);
-
-            let sortedParties = allPartyKeys.sort((a, b) => {
-                const countA = votesData[a] || 0;
-                const countB = votesData[b] || 0;
-                return countB - countA;
-            });
-
-            let maxVotes = Math.max(...Object.values(votesData), 1);
-
-            sortedParties.forEach((partyKey, index) => {
-                const count = votesData[partyKey] || 0;
-                const pct = (count / maxVotes) * 100;
-
-                const isFastStart = (index === 2 || index === 3);
-                const displayPartyName = partyKey.split('-')[0].trim() + ' - ' + (partyKey.split('-')[1] || '').trim();
-
-                const row = document.createElement('div');
-                row.className = 'row-group';
-                row.innerHTML = `
-                    <div class="row-label" title="${displayPartyName}">${displayPartyName}</div>
-                    <div class="row-bar-wrapper">
-                        <div class="row-bar ${isFastStart ? 'row-bar-fast-start' : ''}" style="width: 0%" id="bar-${encodeURIComponent(partyKey)}"></div>
-                    </div>
-                    <div class="row-val" id="val-${encodeURIComponent(partyKey)}">${count}</div>
-                `;
-                container.appendChild(row);
-
-                setTimeout(() => {
-                    const barEl = document.getElementById(`bar-${encodeURIComponent(partyKey)}`);
-                    if (barEl) barEl.style.width = pct + '%';
-                }, 200);
-
-                setTimeout(() => {
-                    const valEl = document.getElementById(`val-${encodeURIComponent(partyKey)}`);
-                    if (valEl) valEl.classList.add('show-val');
-                }, 3800);
-            });
-        }
-
-        /* --- זיקוקים בספירה לאחור --- */
-        let canvas, ctx, particles = [];
-
-        function initFireworksCanvas() {
-            canvas = document.getElementById('fireworks-canvas');
-            ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particles = [];
-            requestAnimationFrame(loopFireworks);
-        }
-
-        function createFireworkExplosion() {
-            const x = window.innerWidth / 2;
-            const y = window.innerHeight / 2;
-            const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ffffff'];
-
-            for (let i = 0; i < 110; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = Math.random() * 14 + 3;
-                particles.push({
-                    x: x,
-                    y: y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    alpha: 1,
-                    decay: Math.random() * 0.02 + 0.015
+        function triggerFireworks() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 40,
+                    spread: 60,
+                    origin: { y: 0.6 }
                 });
             }
         }
 
-        function loopFireworks() {
-            if (!canvas) return;
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        function showSuccessToast() {
+            const msg = document.getElementById('success-msg');
+            msg.style.display = 'block';
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 2000);
+        }
 
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.alpha -= p.decay;
+        // ניהול תצוגות (מנהל/תלמיד)
+        let isAdmin = false;
+        function toggleAdminView() {
+            isAdmin = !isAdmin;
+            document.getElementById('student-view').style.display = isAdmin ? 'none' : 'flex';
+            document.getElementById('admin-view').style.display = isAdmin ? 'flex' : 'none';
 
-                if (p.alpha <= 0) {
-                    particles.splice(i, 1);
-                    continue;
+            if (isAdmin) {
+                updateAdminDashboard();
+            }
+        }
+
+        function updateAdminDashboard() {
+            // חישוב סה"כ
+            let total = 0;
+            let maxVotes = -1;
+            let leader = '-';
+
+            MAIN_PARTIES.forEach(p => {
+                const count = votes[p.letters] || 0;
+                total += count;
+                if (count > maxVotes && count > 0) {
+                    maxVotes = count;
+                    leader = p.letters;
                 }
+            });
 
-                ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.fill();
-                ctx.restore();
+            document.getElementById('total-votes').innerText = total;
+            document.getElementById('leading-party').innerText = leader;
+
+            renderChart();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            
+            const labels = MAIN_PARTIES.map(p => p.letters);
+            const data = MAIN_PARTIES.map(p => votes[p.letters] || 0);
+
+            if (myChart) {
+                myChart.destroy();
             }
 
-            requestAnimationFrame(loopFireworks);
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'מספר קולות',
+                        data: data,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
         }
+
+        function resetVotes() {
+            if (confirm('האם אתה בטוח שברצונך לאפס את כל התוצאות?')) {
+                votes = {};
+                MAIN_PARTIES.forEach(p => votes[p.letters] = 0);
+                saveVotes();
+                updateAdminDashboard();
+            }
+        }
+
+        function exportData() {
+            let csv = '\uFEFF'; // BOM לתמיכה בעברית באקסל
+            csv += 'אותיות,שם מפלגה,קולות\n';
+            MAIN_PARTIES.forEach(p => {
+                csv += `"${p.letters}","${p.name}",${votes[p.letters] || 0}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'results_elections_2026.csv';
+            link.click();
+        }
+
+        // אתחול
+        window.onload = () => {
+            loadVotes();
+            renderCards();
+        };
     </script>
 </body>
 </html>
