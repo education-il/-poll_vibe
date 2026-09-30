@@ -6,9 +6,11 @@
     <title>PollVibe - סקר בחירות בלייב</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-        body { background: #0f172a; color: white; height: 100vh; overflow: hidden; position: relative; }
+        
+        /* רקע לבן/בהיר */
+        body { background: #f8fafc; color: #0f172a; height: 100vh; overflow: hidden; position: relative; }
 
-        /* לוגו נקי בצד ימין למעלה */
+        /* לוגו מוגדל בצד ימין למעלה */
         .school-logo {
             position: fixed;
             top: 15px;
@@ -16,117 +18,194 @@
             z-index: 1000;
         }
         .school-logo img {
-            height: 55px;
+            height: 80px; /* מוגדל */
             width: auto;
             object-fit: contain;
-            filter: drop-shadow(0px 2px 8px rgba(0,0,0,0.5));
+            filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.15));
         }
 
-        /* תצוגת נייד (תלמיד) */
-        #student-view { display: none; height: 100vh; padding: 80px 15px 15px 15px; flex-direction: column; overflow-y: auto; }
-        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 20px; }
-        .party-card { background: #1e293b; border: 2px solid #334155; border-radius: 16px; padding: 20px 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; text-align: center; color: #f8fafc; transition: all 0.2s; cursor: pointer; min-height: 80px; }
-        .party-card:active { transform: scale(0.96); background: #2563eb; }
+        /* תצוגת נייד (תלמיד) - מותאמת לעמוד אחד ללא גלילה */
+        #student-view { 
+            display: none; 
+            height: 100vh; 
+            padding: 100px 15px 20px 15px; 
+            flex-direction: column; 
+            justify-content: center;
+        }
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            height: 100%;
+            max-height: calc(100vh - 120px);
+        }
+        .party-card { 
+            background: #ffffff; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 14px; 
+            padding: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            text-align: center; 
+            color: #1e293b; 
+            transition: all 0.2s; 
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .party-card:active { transform: scale(0.96); background: #2563eb; color: white; }
 
         /* פופ-אפ אישור */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1100; }
-        .modal-content { background: #1e293b; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 350px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1100; backdrop-filter: blur(4px); }
+        .modal-content { background: #ffffff; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 350px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
         .btn { padding: 12px 24px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin: 8px; font-size: 1rem; }
         .btn-confirm { background: #22c55e; color: white; }
         .btn-cancel { background: #ef4444; color: white; }
 
         /* תצוגת מנהל */
-        #admin-view { display: none; height: 100vh; flex-direction: column; justify-content: space-between; padding: 80px 30px 30px 30px; text-align: center; }
-        .status-badge { font-size: 1.5rem; background: #334155; padding: 10px 25px; border-radius: 50px; display: inline-block; margin: 0 auto; }
+        #admin-view { display: none; height: 100vh; flex-direction: column; justify-content: space-between; padding: 100px 30px 40px 30px; text-align: center; align-items: center; }
+        .status-badge { font-size: 1.4rem; font-weight: 600; background: #e2e8f0; color: #334155; padding: 10px 30px; border-radius: 50px; display: inline-block; }
         
-        /* קלפי אמיתית ואנימציית מעטפות */
-        .box-container { position: relative; width: 320px; height: 260px; margin: 0 auto; display: flex; justify-content: center; align-items: flex-end; }
+        /* קלפי ומתחתיה מונה הקולות */
+        .box-container { position: relative; width: 320px; display: flex; flex-direction: column; align-items: center; }
         
         .kalfi-image { 
-            width: 280px; 
+            width: 260px; 
             height: auto; 
             object-fit: contain; 
-            filter: drop-shadow(0px 15px 25px rgba(0, 0, 0, 0.6));
+            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.15));
             position: relative;
             z-index: 2;
         }
 
-        .vote-counter-overlay {
-            position: absolute;
-            bottom: 35px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3;
-            text-align: center;
-            background: rgba(15, 23, 42, 0.85);
-            padding: 4px 18px;
-            border-radius: 12px;
-            border: 1px solid #3b82f6;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        /* מונה קולות מתחת לתיבה כדי שלא ידרוס אותה */
+        .vote-counter-under {
+            margin-top: 15px;
+            background: #ffffff;
+            padding: 10px 30px;
+            border-radius: 16px;
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+        .vote-count { font-size: 3.2rem; font-weight: 900; color: #2563eb; line-height: 1; }
+        .vote-label { font-size: 0.95rem; color: #64748b; margin-top: 4px; font-weight: 600; }
 
-        .vote-count { font-size: 2.8rem; font-weight: 900; color: #38bdf8; line-height: 1; }
-        .vote-label { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
-
-        /* אנימציית נפילת מעטפה אל חריץ הקלפי */
+        /* אנימציית מעטפה נכנסת לחריץ */
         .envelope { 
             position: absolute; 
-            width: 42px; 
-            height: 28px; 
+            width: 40px; 
+            height: 26px; 
             background: #fef08a; 
             border: 2px solid #ca8a04; 
             border-radius: 4px; 
-            top: -50px; 
+            top: -40px; 
             z-index: 1; 
             animation: dropIntoKalfi 1.1s ease-in forwards; 
         }
 
         @keyframes dropIntoKalfi {
-            0% { 
-                top: -50px; 
-                opacity: 0; 
-                transform: scale(1.2) rotate(-10deg); 
-            }
-            30% { 
-                opacity: 1; 
-            }
-            80% { 
-                top: 55px; 
-                opacity: 1; 
-                transform: scale(0.85) rotate(5deg); 
-            }
-            100% { 
-                top: 75px; 
-                opacity: 0; 
-                transform: scale(0.4) rotate(0deg); 
-            }
+            0% { top: -40px; opacity: 0; transform: scale(1.2) rotate(-10deg); }
+            30% { opacity: 1; }
+            80% { top: 40px; opacity: 1; transform: scale(0.85) rotate(5deg); }
+            100% { top: 60px; opacity: 0; transform: scale(0.4) rotate(0deg); }
         }
 
-        .timer-display { font-size: 3rem; color: #ef4444; font-weight: bold; height: 50px; }
-        .admin-actions { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-        .admin-btn { padding: 15px 25px; font-size: 1.1rem; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.3s, background-color 0.3s; }
-        .admin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .btn-start { background: #22c55e; color: white; }
-        .btn-stop { background: #eab308; color: black; }
-        .btn-reset { background: #ef4444; color: white; }
-        .btn-sim { background: #06b6d4; color: white; }
-        .btn-sim-active { background: #f97316; color: white; }
+        .timer-display { font-size: 2.2rem; color: #dc2626; font-weight: bold; height: 50px; }
+        
+        /* כפתורי מנהל מעוצבים */
+        .admin-actions { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; max-width: 400px; }
+        
+        /* כפתור זרימה מרכזי וגדול */
+        .btn-main-flow { 
+            width: 100%;
+            padding: 18px 30px; 
+            font-size: 1.4rem; 
+            border-radius: 16px; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: white;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        .state-start { background: #22c55e; }
+        .state-start:hover { background: #16a34a; }
+        .state-stop { background: #eab308; color: #0f172a; }
+        .state-stop:hover { background: #ca8a04; }
+        .state-reveal { background: #8b5cf6; }
+        .state-reveal:hover { background: #7c3aed; }
 
-        /* מסך תוצאות אופקי */
-        #results-screen { display: none; height: 100vh; padding: 80px 20px 20px 20px; flex-direction: column; align-items: center; }
+        .btn-sim { background: #0284c7; color: white; padding: 10px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+        .btn-sim-active { background: #ea580c; color: white; }
+
+        /* כפתור איפוס קטן ולא בולט בתחתית */
+        .btn-reset-small { 
+            background: transparent; 
+            color: #94a3b8; 
+            border: 1px solid #cbd5e1; 
+            padding: 6px 16px; 
+            font-size: 0.85rem; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            transition: all 0.2s;
+        }
+        .btn-reset-small:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+
+        /* מסך תוצאות אופקי בהיר */
+        #results-screen { display: none; height: 100vh; padding: 100px 20px 20px 20px; flex-direction: column; align-items: center; }
         .horizontal-chart-container { display: flex; flex-direction: column; gap: 12px; width: 90%; max-width: 900px; height: 70vh; overflow-y: auto; padding-right: 10px; }
         
-        .row-group { display: flex; align-items: center; gap: 15px; width: 100%; background: #1e293b; padding: 10px 15px; border-radius: 12px; border: 1px solid #334155; }
-        .row-label { width: 180px; font-size: 1.1rem; font-weight: bold; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .row-group { display: flex; align-items: center; gap: 15px; width: 100%; background: #ffffff; padding: 12px 18px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .row-label { width: 180px; font-size: 1.1rem; font-weight: bold; text-align: right; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .row-bar-wrapper { flex: 1; display: flex; align-items: center; background: #0f172a; height: 32px; border-radius: 8px; overflow: hidden; position: relative; }
-        .row-bar { height: 100%; background: linear-gradient(90deg, #2563eb, #3b82f6); border-radius: 8px; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); width: 0%; min-width: 4px; }
-        .row-val { font-size: 1.1rem; font-weight: bold; width: 50px; text-align: left; color: #60a5fa; }
+        .row-bar-wrapper { flex: 1; display: flex; align-items: center; background: #f1f5f9; height: 32px; border-radius: 8px; overflow: hidden; position: relative; }
+        .row-bar { height: 100%; background: linear-gradient(90deg, #3b82f6, #1d4ed8); border-radius: 8px; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); width: 0%; min-width: 4px; }
+        .row-val { font-size: 1.2rem; font-weight: bold; width: 50px; text-align: left; color: #1d4ed8; }
+
+        /* מסך ספירה לאחור חווייתי (Countdown Overlay) */
+        #countdown-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            z-index: 2000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #fireworks-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .countdown-number {
+            font-size: 18rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+            z-index: 2001;
+            animation: zoomAndPop 1s cubic-bezier(0.11, 0, 0.5, 1) forwards;
+        }
+
+        @keyframes zoomAndPop {
+            0% { transform: scale(0.2); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            80% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- לוגו דרכא קבוע בצד ימין למעלה -->
+    <!-- לוגו דרכא מוגדל בצד ימין למעלה -->
     <div class="school-logo">
         <img src="logo.png" alt="תיכון דרכא למדעים ואמנויות ע&quot;ש מקסים לוי">
     </div>
@@ -139,8 +218,8 @@
     <!-- פופ אפ אישור תלמיד -->
     <div class="modal" id="confirm-modal">
         <div class="modal-content">
-            <h3>אישור הצבעה</h3>
-            <p id="modal-text" style="margin: 15px 0; font-size: 1.2rem;"></p>
+            <h3 style="color: #0f172a;">אישור הצבעה</h3>
+            <p id="modal-text" style="margin: 15px 0; font-size: 1.2rem; color: #475569;"></p>
             <button class="btn btn-confirm" onclick="submitVote()">אישור והצבעה</button>
             <button class="btn btn-cancel" onclick="closeModal()">שינוי בחירה</button>
         </div>
@@ -150,10 +229,10 @@
     <div id="admin-view">
         <div class="status-badge" id="status-text">מצב הצבעה: סגור</div>
         
-        <!-- תיבת הקלפי האמיתית עם תמונת kalfi_tp.jpeg -->
+        <!-- קלפי + מונה מתחתיה -->
         <div class="box-container" id="box-container">
             <img src="kalfi_tp.jpeg" alt="קלפי" class="kalfi-image">
-            <div class="vote-counter-overlay">
+            <div class="vote-counter-under">
                 <div class="vote-count" id="vote-count">0</div>
                 <div class="vote-label">קולות שנרשמו</div>
             </div>
@@ -162,18 +241,27 @@
         <div class="timer-display" id="timer-display"></div>
 
         <div class="admin-actions">
-            <button class="admin-btn btn-start" id="toggle-btn" onclick="toggleVoting()">התחל הצבעה</button>
-            <button class="admin-btn btn-sim" id="sim-btn" onclick="handleSimulation()">הפעל סימולציה (200 קולות)</button>
-            <button class="admin-btn btn-reset" onclick="resetVoting()">איפוס הצבעה</button>
-            <button class="admin-btn" id="reveal-btn" style="background: #a855f7; color: white;" onclick="showResults()" disabled>חשוף תוצאות</button>
+            <!-- כפתור זרימה מרכזי יחיד -->
+            <button class="btn-main-flow state-start" id="main-flow-btn" onclick="handleMainFlow()">התחל הצבעה</button>
+            
+            <button class="btn-sim" id="sim-btn" onclick="handleSimulation()">הפעל סימולציה (200 קולות)</button>
+            
+            <!-- כפתור איפוס דיסקרטי בתחתית -->
+            <button class="btn-reset-small" onclick="resetVoting()">איפוס נתונים</button>
         </div>
     </div>
 
     <!-- מסך תוצאות -->
     <div id="results-screen">
-        <h1 style="font-size: 2rem; margin-bottom: 20px;">תוצאות הבחירות</h1>
+        <h1 style="font-size: 2.2rem; margin-bottom: 20px; color: #0f172a;">תוצאות הבחירות</h1>
         <div class="horizontal-chart-container" id="chart-container"></div>
-        <button class="admin-btn btn-reset" style="margin-top: 20px;" onclick="location.reload()">חזרה למנהל</button>
+        <button class="btn-main-flow state-start" style="margin-top: 20px; width: auto; font-size: 1.1rem; padding: 12px 30px;" onclick="location.reload()">חזרה למסך מנהל</button>
+    </div>
+
+    <!-- אובייקט ספירה לאחור חווייתי לקראת חשיפה -->
+    <div id="countdown-overlay">
+        <canvas id="fireworks-canvas"></canvas>
+        <div id="countdown-num-box"></div>
     </div>
 
     <script>
@@ -230,11 +318,15 @@
             }
 
             if (data.type === 'START_COUNTDOWN') {
-                document.getElementById('timer-display').innerText = "10";
+                document.getElementById('timer-display').innerText = "הצבעה נסגרת בעוד: 10";
             }
 
             if (data.type === 'TIMER_TICK') {
-                document.getElementById('timer-display').innerText = data.timer > 0 ? data.timer : "";
+                if (data.timer > 0) {
+                    document.getElementById('timer-display').innerText = `הצבעה נסגרת בעוד: ${data.timer}`;
+                } else {
+                    document.getElementById('timer-display').innerText = "";
+                }
             }
 
             if (data.type === 'VOTE_SUCCESS') {
@@ -257,6 +349,11 @@
         function renderStudentGrid() {
             const grid = document.getElementById('parties-grid');
             grid.innerHTML = '';
+            
+            // התאמה דינמית לעמוד אחד ללא גלילה
+            const columns = partiesData.length > 6 ? 2 : 1;
+            grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+
             partiesData.forEach(party => {
                 const card = document.createElement('div');
                 card.className = 'party-card';
@@ -282,33 +379,43 @@
         }
 
         function updateAdminUI(total) {
-            const btn = document.getElementById('toggle-btn');
+            const flowBtn = document.getElementById('main-flow-btn');
             const statusText = document.getElementById('status-text');
-            const revealBtn = document.getElementById('reveal-btn');
 
             if (currentStatus === 'closed') {
                 statusText.innerText = "מצב הצבעה: סגור";
-                btn.innerText = "התחל הצבעה";
-                btn.className = "admin-btn btn-start";
-                revealBtn.disabled = false;
+                flowBtn.innerText = "התחל הצבעה";
+                flowBtn.className = "btn-main-flow state-start";
+                flowBtn.disabled = false;
             } else if (currentStatus === 'voting') {
                 statusText.innerText = "מצב הצבעה: אוסף קולות...";
-                btn.innerText = "עצור הצבעה";
-                btn.className = "admin-btn btn-stop";
-                revealBtn.disabled = true;
+                flowBtn.innerText = "עצור הצבעה";
+                flowBtn.className = "btn-main-flow state-stop";
+                flowBtn.disabled = false;
             } else if (currentStatus === 'stopping') {
-                statusText.innerText = "מצב הצבעה: נעצר...";
-                revealBtn.disabled = true;
+                statusText.innerText = "מצב הצבעה: נסגר...";
+                flowBtn.innerText = "חכה לסגירה...";
+                flowBtn.disabled = true;
+            }
+            
+            // אם ההצבעה נסגרה ויש קולות/הייתה פעילות, ניתן לעבור ל"חשוף תוצאות"
+            if (currentStatus === 'closed' && (total > 0 || Object.keys(votesData).length > 0)) {
+                flowBtn.innerText = "חשוף תוצאות 🚀";
+                flowBtn.className = "btn-main-flow state-reveal";
             }
         }
 
-        function toggleVoting() {
-            if (isSimulating) stopSimulationInternal();
-            
-            if (currentStatus === 'closed') {
+        function handleMainFlow() {
+            const flowBtn = document.getElementById('main-flow-btn');
+
+            if (currentStatus === 'closed' && flowBtn.innerText.includes("התחל")) {
+                if (isSimulating) stopSimulationInternal();
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'START' }));
             } else if (currentStatus === 'voting') {
+                if (isSimulating) stopSimulationInternal();
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'STOP' }));
+            } else if (currentStatus === 'closed' && flowBtn.innerText.includes("חשוף")) {
+                startGrandCountdown();
             }
         }
 
@@ -333,7 +440,7 @@
 
             const simBtn = document.getElementById('sim-btn');
             simBtn.innerText = "עצור סימולציה";
-            simBtn.className = "admin-btn btn-sim-active";
+            simBtn.className = "btn-sim btn-sim-active";
 
             ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'RESET' }));
             
@@ -358,7 +465,7 @@
             }));
 
             simVotesCount++;
-            simTimeout = setTimeout(sendNextSimVote, 100 + Math.random() * 150);
+            simTimeout = setTimeout(sendNextSimVote, 80 + Math.random() * 120);
         }
 
         function stopSimulationInternal() {
@@ -368,7 +475,7 @@
             const simBtn = document.getElementById('sim-btn');
             if (simBtn) {
                 simBtn.innerText = "הפעל סימולציה (200 קולות)";
-                simBtn.className = "admin-btn btn-sim";
+                simBtn.className = "btn-sim";
             }
         }
 
@@ -376,15 +483,39 @@
             const container = document.getElementById('box-container');
             const env = document.createElement('div');
             env.className = 'envelope';
-            // הסטת המעטפות לאזור החריץ של הקלפי
-            env.style.left = (120 + (Math.random() * 60 - 30)) + 'px';
+            env.style.left = (140 + (Math.random() * 40 - 20)) + 'px';
             container.appendChild(env);
             setTimeout(() => env.remove(), 1100);
         }
 
-        function showResults() {
+        /* --- ספירה לאחור דרמטית (5 עד 1) כולל זיקוקים --- */
+        function startGrandCountdown() {
             if (isSimulating) stopSimulationInternal();
 
+            const overlay = document.getElementById('countdown-overlay');
+            const numBox = document.getElementById('countdown-num-box');
+            overlay.style.display = 'flex';
+
+            initFireworksCanvas();
+
+            let count = 5;
+
+            function step() {
+                if (count > 0) {
+                    numBox.innerHTML = `<div class="countdown-number">${count}</div>`;
+                    createFireworkExplosion();
+                    count--;
+                    setTimeout(step, 1000);
+                } else {
+                    overlay.style.display = 'none';
+                    showResults();
+                }
+            }
+
+            step();
+        }
+
+        function showResults() {
             document.getElementById('admin-view').style.display = 'none';
             document.getElementById('results-screen').style.display = 'flex';
 
@@ -419,6 +550,66 @@
                     if (el) el.style.width = pct + '%';
                 }, 150);
             });
+        }
+
+        /* --- מנוע זיקוקים קל משקל ב-Canvas --- */
+        let canvas, ctx, particles = [];
+
+        function initFireworksCanvas() {
+            canvas = document.getElementById('fireworks-canvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            requestAnimationFrame(loopFireworks);
+        }
+
+        function createFireworkExplosion() {
+            const x = window.innerWidth / 2;
+            const y = window.innerHeight / 2;
+            const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ffffff'];
+
+            for (let i = 0; i < 80; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 12 + 2;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        function loopFireworks() {
+            if (!canvas) return;
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            requestAnimationFrame(loopFireworks);
         }
     </script>
 </body>
