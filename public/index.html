@@ -37,23 +37,23 @@
         }
 
         .timer-display { font-size: 3rem; color: #ef4444; font-weight: bold; height: 60px; }
-        .admin-actions { display: flex; justify-content: center; gap: 20px; }
-        .admin-btn { padding: 15px 30px; font-size: 1.2rem; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.3s; }
+        .admin-actions { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .admin-btn { padding: 15px 25px; font-size: 1.1rem; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.3s, background-color 0.3s; }
         .admin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-start { background: #22c55e; color: white; }
         .btn-stop { background: #eab308; color: black; }
         .btn-reset { background: #ef4444; color: white; }
+        .btn-sim { background: #06b6d4; color: white; }
+        .btn-sim-active { background: #f97316; color: white; }
 
-        /* מסך תוצאות - תיקון יישור העמודות בגרף */
+        /* מסך תוצאות - יישור תחתון מושלם */
         #results-screen { display: none; height: 100vh; padding: 30px 20px; flex-direction: column; align-items: center; }
         .chart-container { display: flex; align-items: flex-end; gap: 12px; height: 70%; width: 95%; border-bottom: 4px solid #475569; padding-bottom: 0px; }
         .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
         
-        /* מכולה ייעודית לעמודה המאפשרת יישור תחתון מושלם */
         .bar-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
         .bar { width: 100%; background: #3b82f6; border-radius: 6px 6px 0 0; transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1); height: 0%; min-height: 4px; }
         
-        /* קיבוע גובה התוויות למניעת תזוזת הקו התחתון */
         .bar-label { height: 50px; margin-top: 8px; font-size: 0.85rem; text-align: center; font-weight: bold; display: flex; align-items: flex-start; justify-content: center; line-height: 1.2; word-break: break-word; width: 100%; }
         .bar-val { font-size: 1.1rem; margin-bottom: 4px; font-weight: bold; }
     </style>
@@ -90,6 +90,7 @@
 
         <div class="admin-actions">
             <button class="admin-btn btn-start" id="toggle-btn" onclick="toggleVoting()">התחל הצבעה</button>
+            <button class="admin-btn btn-sim" id="sim-btn" onclick="handleSimulation()">הפעל סימולציה (200 קולות)</button>
             <button class="admin-btn btn-reset" onclick="resetVoting()">איפוס הצבעה</button>
             <button class="admin-btn" id="reveal-btn" style="background: #a855f7; color: white;" onclick="showResults()" disabled>חשוף תוצאות</button>
         </div>
@@ -113,6 +114,12 @@
         let currentStatus = 'closed';
         let partiesData = [];
         let votesData = {};
+
+        // משתני סימולציה
+        let simInterval = null;
+        let isSimulating = false;
+        let simVotesCount = 0;
+        const TARGET_SIM_VOTES = 200;
 
         if (isAdmin) {
             document.getElementById('admin-view').style.display = 'flex';
@@ -158,11 +165,12 @@
             }
 
             if (data.type === 'RESET_ALL') {
+                stopSimulationInternal();
                 location.reload();
             }
 
             if (data.type === 'ERROR') {
-                alert(data.message);
+                if (!isSimulating) alert(data.message);
             }
         };
 
@@ -215,6 +223,8 @@
         }
 
         function toggleVoting() {
+            if (isSimulating) stopSimulationInternal();
+            
             if (currentStatus === 'closed') {
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'START' }));
             } else if (currentStatus === 'voting') {
@@ -223,8 +233,65 @@
         }
 
         function resetVoting() {
+            stopSimulationInternal();
             if (confirm("האם אתה בטוח שברצונך למחוק את כל הקולות?")) {
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'RESET' }));
+            }
+        }
+
+        /* מנגנון סימולציה */
+        function handleSimulation() {
+            if (isSimulating) {
+                stopSimulationInternal();
+            } else {
+                startSimulationSequence();
+            }
+        }
+
+        function startSimulationSequence() {
+            // איפוס מלא בשרת
+            ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'RESET' }));
+
+            setTimeout(() => {
+                // פתיחת הצבעה
+                ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'START' }));
+
+                isSimulating = true;
+                simVotesCount = 0;
+
+                const simBtn = document.getElementById('sim-btn');
+                simBtn.innerText = "עצור סימולציה";
+                simBtn.className = "admin-btn btn-sim-active";
+
+                // הזרמת קולות במרווחי זמן
+                simInterval = setInterval(() => {
+                    if (simVotesCount >= TARGET_SIM_VOTES) {
+                        stopSimulationInternal();
+                        return;
+                    }
+
+                    const randomParty = partiesData[Math.floor(Math.random() * partiesData.length)];
+                    const fakeDeviceId = 'sim_dev_' + Math.random().toString(36).substr(2, 9);
+
+                    ws.send(JSON.stringify({
+                        type: 'VOTE',
+                        party: randomParty,
+                        deviceId: fakeDeviceId
+                    }));
+
+                    simVotesCount++;
+                }, 180); // הזרמה בקצב קלפי חי
+            }, 300);
+        }
+
+        function stopSimulationInternal() {
+            if (simInterval) clearInterval(simInterval);
+            isSimulating = false;
+            
+            const simBtn = document.getElementById('sim-btn');
+            if (simBtn) {
+                simBtn.innerText = "הפעל סימולציה (200 קולות)";
+                simBtn.className = "admin-btn btn-sim";
             }
         }
 
@@ -238,6 +305,8 @@
         }
 
         function showResults() {
+            if (isSimulating) stopSimulationInternal();
+
             document.getElementById('admin-view').style.display = 'none';
             document.getElementById('results-screen').style.display = 'flex';
 
