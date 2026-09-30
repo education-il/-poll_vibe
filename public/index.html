@@ -9,9 +9,9 @@
         body { background: #0f172a; color: white; height: 100vh; overflow: hidden; }
 
         /* תצוגת נייד (תלמיד) */
-        #student-view { display: none; height: 100vh; padding: 15px; flex-direction: column; }
-        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; height: 100%; }
-        .party-card { background: #1e293b; border: 2px solid #334155; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; text-align: center; color: #f8fafc; transition: all 0.2s; cursor: pointer; }
+        #student-view { display: none; height: 100vh; padding: 15px; flex-direction: column; overflow-y: auto; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 20px; }
+        .party-card { background: #1e293b; border: 2px solid #334155; border-radius: 16px; padding: 20px 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; text-align: center; color: #f8fafc; transition: all 0.2s; cursor: pointer; min-height: 80px; }
         .party-card:active { transform: scale(0.96); background: #2563eb; }
 
         /* פופ-אפ אישור */
@@ -44,13 +44,18 @@
         .btn-stop { background: #eab308; color: black; }
         .btn-reset { background: #ef4444; color: white; }
 
-        /* מסך תוצאות */
-        #results-screen { display: none; height: 100vh; padding: 40px; flex-direction: column; align-items: center; }
-        .chart-container { display: flex; align-items: flex-end; gap: 20px; height: 70%; width: 90%; border-bottom: 4px solid #475569; padding-bottom: 10px; }
+        /* מסך תוצאות - תיקון יישור העמודות בגרף */
+        #results-screen { display: none; height: 100vh; padding: 30px 20px; flex-direction: column; align-items: center; }
+        .chart-container { display: flex; align-items: flex-end; gap: 12px; height: 70%; width: 95%; border-bottom: 4px solid #475569; padding-bottom: 0px; }
         .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
-        .bar { width: 100%; background: #3b82f6; border-radius: 8px 8px 0 0; transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1); height: 0%; min-height: 5px; }
-        .bar-label { margin-top: 10px; font-size: 1.1rem; text-align: center; font-weight: bold; }
-        .bar-val { font-size: 1.2rem; margin-bottom: 5px; font-weight: bold; }
+        
+        /* מכולה ייעודית לעמודה המאפשרת יישור תחתון מושלם */
+        .bar-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+        .bar { width: 100%; background: #3b82f6; border-radius: 6px 6px 0 0; transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1); height: 0%; min-height: 4px; }
+        
+        /* קיבוע גובה התוויות למניעת תזוזת הקו התחתון */
+        .bar-label { height: 50px; margin-top: 8px; font-size: 0.85rem; text-align: center; font-weight: bold; display: flex; align-items: flex-start; justify-content: center; line-height: 1.2; word-break: break-word; width: 100%; }
+        .bar-val { font-size: 1.1rem; margin-bottom: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -92,9 +97,9 @@
 
     <!-- מסך תוצאות -->
     <div id="results-screen">
-        <h1 style="font-size: 2.5rem; margin-bottom: 20px;">תוצאות הבחירות</h1>
+        <h1 style="font-size: 2.2rem; margin-bottom: 15px;">תוצאות הבחירות</h1>
         <div class="chart-container" id="chart-container"></div>
-        <button class="admin-btn btn-reset" style="margin-top: 30px;" onclick="location.reload()">חזרה למנהל</button>
+        <button class="admin-btn btn-reset" style="margin-top: 25px;" onclick="location.reload()">חזרה למנהל</button>
     </div>
 
     <script>
@@ -119,7 +124,7 @@
             const data = JSON.parse(event.data);
 
             if (data.type === 'INIT') {
-                partiesData = data.parties.sort((a,b) => a.localeCompare(b, 'he'));
+                partiesData = data.parties;
                 votesData = data.state.votes || {};
                 currentStatus = data.state.status;
                 
@@ -197,15 +202,15 @@
                 statusText.innerText = "מצב הצבעה: סגור";
                 btn.innerText = "התחל הצבעה";
                 btn.className = "admin-btn btn-start";
-                revealBtn.disabled = false; // אפשר ללחוץ רק כשההצבעה סגורה
+                revealBtn.disabled = false;
             } else if (currentStatus === 'voting') {
                 statusText.innerText = "מצב הצבעה: אוסף קולות...";
                 btn.innerText = "עצור הצבעה";
                 btn.className = "admin-btn btn-stop";
-                revealBtn.disabled = true; // מנוטרל בזמן איסוף
+                revealBtn.disabled = true;
             } else if (currentStatus === 'stopping') {
                 statusText.innerText = "מצב הצבעה: נעצר...";
-                revealBtn.disabled = true; // מנוטרל בזמן ספירה לאחור
+                revealBtn.disabled = true;
             }
         }
 
@@ -249,13 +254,16 @@
                 group.className = 'bar-group';
                 group.innerHTML = `
                     <div class="bar-val">${count}</div>
-                    <div class="bar" style="height: 0%" id="bar-${party}"></div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height: 0%" id="bar-${encodeURIComponent(party)}"></div>
+                    </div>
                     <div class="bar-label">${party}</div>
                 `;
                 container.appendChild(group);
 
                 setTimeout(() => {
-                    document.getElementById(`bar-${party}`).style.height = pct + '%';
+                    const el = document.getElementById(`bar-${encodeURIComponent(party)}`);
+                    if (el) el.style.height = pct + '%';
                 }, 200);
             });
         }
