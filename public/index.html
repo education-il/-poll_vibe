@@ -421,7 +421,6 @@
             padding: 20px;
         }
         
-        /* הקנבס נמצא בשכבה מתחת לטקסט */
         #fireworks-canvas { 
             position: absolute; 
             inset: 0; 
@@ -431,7 +430,6 @@
             z-index: 2000; 
         }
 
-        /* תיבת המספרים ממוקמת מעל הקנבס */
         #countdown-num-box {
             position: relative;
             z-index: 2005;
@@ -440,6 +438,7 @@
             justify-content: center;
         }
 
+        /* תנועת מילים רציפה, זורמת ונקייה ללא שיהוקים */
         .intro-phrase {
             font-size: 4.5rem;
             font-weight: 900;
@@ -447,14 +446,24 @@
             text-align: center;
             text-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
             line-height: 1.2;
-            animation: zoomAndFade 2.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: smoothZoomAndFade 2.8s ease-in-out forwards;
         }
 
-        @keyframes zoomAndFade {
-            0% { transform: scale(0.6); opacity: 0; }
-            20% { transform: scale(1); opacity: 1; }
-            75% { transform: scale(1.08); opacity: 1; }
-            100% { transform: scale(1.25); opacity: 0; }
+        @keyframes smoothZoomAndFade {
+            0% { 
+                transform: scale(0.65); 
+                opacity: 0; 
+            }
+            18% { 
+                opacity: 1; 
+            }
+            82% { 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(1.22); 
+                opacity: 0; 
+            }
         }
 
         .countdown-number {
@@ -544,7 +553,7 @@
             </button>
 
             <!-- גרסה מעודכנת -->
-            <div class="version-tag">v1.21</div>
+            <div class="version-tag">v1.22</div>
         </div>
     </div>
 
@@ -828,7 +837,7 @@
                 if (phraseIdx < phrases.length) {
                     numBox.innerHTML = `<div class="intro-phrase" key="${phraseIdx}">${phrases[phraseIdx]}</div>`;
                     phraseIdx++;
-                    setTimeout(showNextPhrase, 3000);
+                    setTimeout(showNextPhrase, 2800);
                 } else {
                     initFireworksCanvas();
                     startNumbersCountdown();
@@ -907,7 +916,7 @@
             });
         }
 
-        /* --- מנוע זיקוקים מעודכן וללא החשכת מסך --- */
+        /* --- זיקוקים --- */
         let canvas, ctx, particles = [];
 
         function initFireworksCanvas() {
@@ -941,7 +950,6 @@
 
         function loopFireworks() {
             if (!canvas) return;
-            // ניקוי הקנבס בצורה שקופה לחלוטין
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             for (let i = particles.length - 1; i >= 0; i--) {
