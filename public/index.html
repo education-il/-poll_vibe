@@ -12,15 +12,15 @@
         /* לוגו בצד ימין למעלה */
         .school-logo {
             position: fixed;
-            top: 15px;
-            right: 20px;
+            top: 20px;
+            right: 25px;
             z-index: 1000;
         }
         .school-logo img {
-            height: 70px;
+            height: 65px;
             width: auto;
             object-fit: contain;
-            filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.15));
+            filter: drop-shadow(0px 2px 8px rgba(0,0,0,0.08));
         }
 
         /* תצוגת נייד (תלמיד) */
@@ -57,7 +57,7 @@
         }
         .party-card:active { transform: scale(0.96); background: #2563eb; color: white; }
 
-        /* שכבת נעילת הצבעה לתלמיד */
+        /* נעילת תלמיד */
         #lock-overlay {
             display: flex;
             position: absolute;
@@ -72,22 +72,9 @@
             padding: 20px;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .lock-icon {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
-            color: #64748b;
-        }
-        .lock-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
-        .lock-subtitle {
-            font-size: 1rem;
-            color: #64748b;
-        }
+        .lock-icon { width: 80px; height: 80px; margin-bottom: 20px; color: #64748b; }
+        .lock-title { font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+        .lock-subtitle { font-size: 1rem; color: #64748b; }
 
         /* פופ-אפ אישור */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1100; backdrop-filter: blur(4px); }
@@ -96,142 +83,180 @@
         .btn-confirm { background: #22c55e; color: white; }
         .btn-cancel { background: #ef4444; color: white; }
 
-        /* תצוגת מנהל */
+        /* === תצוגת מנהל / צופים משודרגת === */
         #admin-view { 
             display: none; 
             height: 100vh; 
             flex-direction: column; 
             justify-content: center; 
-            gap: 15px;
-            padding: 70px 30px 20px 30px; 
-            text-align: center; 
-            align-items: center; 
+            align-items: center;
+            gap: 25px;
+            padding: 40px 20px; 
+            position: relative;
         }
         
-        /* מכלול מרכזי - תיבת קלפי וקוד QR בצדדים */
+        /* מכלול מרכזי - יישור גבהים מושלם של קלפי וברקוד */
         .admin-main-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 60px;
+            gap: 70px;
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
         }
 
         .box-container { 
             position: relative; 
-            width: 360px; /* הוגדל ב-50% */
+            width: 300px;
+            height: 300px;
             display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+            align-items: center;
+            justify-content: center;
         }
 
-        /* קוד QR משמאל לקלפי - מוגדל ב-50% */
         .qr-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 12px;
             background: #ffffff;
             padding: 20px;
-            border-radius: 20px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            width: 300px;
+            height: 300px;
         }
         .qr-image {
-            width: 270px; /* הוגדל ב-50% מ-180px */
-            height: 270px; /* הוגדל ב-50% מ-180px */
+            width: 200px;
+            height: 200px;
             object-fit: contain;
-            border-radius: 8px;
         }
         .qr-label {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            color: #334155;
+            color: #475569;
         }
         
-        /* תמונת קלפי - מוגדלת ב-50% */
         .kalfi-image { 
-            width: 330px; /* הוגדל ב-50% מ-220px */
+            width: 290px; 
             height: auto; 
             object-fit: contain; 
-            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.12));
+            filter: drop-shadow(0px 12px 24px rgba(0, 0, 0, 0.12));
             position: relative;
             z-index: 2;
         }
 
-        /* מונה קולות נקי - כעת ממוקם מתחת לכל האזור המרכזי */
+        /* ספירת קולות מרווחת מתחת */
         .vote-counter-under {
-            margin-top: 5px;
-            background: transparent;
-            padding: 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-top: 5px;
         }
-        .vote-count { font-size: 3.5rem; font-weight: 900; color: #2563eb; line-height: 1; }
-        .vote-label { font-size: 1.05rem; color: #64748b; margin-top: 4px; font-weight: 600; }
+        .vote-count { 
+            font-size: 4.5rem; 
+            font-weight: 900; 
+            color: #2563eb; 
+            line-height: 1; 
+            letter-spacing: -1px;
+        }
+        .vote-label { 
+            font-size: 1.15rem; 
+            color: #64748b; 
+            margin-top: 6px; 
+            font-weight: 600; 
+        }
 
-        /* מעטפה מוגדלת ב-50% */
+        /* מעטפות משודרגות באנפנאטור נייר ריאליסטי */
         .envelope { 
             position: absolute; 
-            width: 60px; /* הוגדל ב-50% מ-40px */
-            height: 39px; /* הוגדל ב-50% מ-26px */
-            background: #fef08a; 
-            border: 3px solid #ca8a04; 
-            border-radius: 5px; 
-            top: -50px; 
+            width: 50px; 
+            height: 32px; 
+            background: #ffffff; 
+            border: 1px solid #cbd5e1;
+            border-radius: 4px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            top: -120px; 
             z-index: 1; 
-            animation: dropIntoKalfi 1.1s ease-in forwards; 
+            animation: dropIntoKalfi 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
+        }
+        /* דש מעטפה מעוצב באייקון CSS */
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 18px solid #f1f5f9;
         }
 
         @keyframes dropIntoKalfi {
-            0% { top: -50px; opacity: 0; transform: scale(1.2) rotate(-10deg); }
-            30% { opacity: 1; }
-            80% { top: 60px; opacity: 1; transform: scale(0.85) rotate(5deg); }
-            100% { top: 90px; opacity: 0; transform: scale(0.4) rotate(0deg); }
+            0% { 
+                top: -120px; 
+                opacity: 0; 
+                transform: scale(1.1) rotate(-15deg); 
+            }
+            20% { 
+                opacity: 1; 
+            }
+            85% { 
+                top: 40px; 
+                opacity: 1; 
+                transform: scale(0.9) rotate(5deg); 
+            }
+            100% { 
+                top: 75px; 
+                opacity: 0; 
+                transform: scale(0.3) rotate(0deg); 
+            }
         }
 
-        .timer-display { font-size: 1.8rem; color: #dc2626; font-weight: bold; height: 35px; }
+        .timer-display { font-size: 1.6rem; color: #dc2626; font-weight: 700; height: 30px; }
         
-        /* אזור כפתורי מנהל */
-        .admin-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 280px; }
-        
-        .btn-main-flow { 
-            width: 100%;
-            padding: 10px 20px; 
-            font-size: 1.05rem; 
-            border-radius: 10px; 
-            border: 1px solid transparent; 
-            cursor: pointer; 
-            font-weight: 600; 
+        /* === כפתורי ניהול מוצנעים בצד שמאל למטה === */
+        .stealth-admin-panel {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 900;
+        }
+
+        .stealth-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #e2e8f0;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
             transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            backdrop-filter: blur(4px);
         }
-        .state-start { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
-        .state-start:hover { background: #dcfce7; }
-        
-        .state-stop { background: #fefce8; color: #854d0e; border-color: #fef08a; }
-        .state-stop:hover { background: #fef9c3; }
-        
-        .state-reveal { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
-        .state-reveal:hover { background: #e9d5ff; }
 
-        .sub-actions-row { display: flex; gap: 12px; justify-content: center; align-items: center; }
-        
-        .btn-frameless { 
-            background: transparent; 
-            color: #64748b; 
-            border: none; 
-            padding: 4px 8px; 
-            font-size: 0.85rem; 
-            font-weight: 500;
-            cursor: pointer; 
-            transition: all 0.2s;
-            text-decoration: underline;
-            text-underline-offset: 3px;
+        .stealth-btn:hover {
+            background: #ffffff;
+            color: #334155;
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: scale(1.05);
         }
-        .btn-frameless:hover { color: #0284c7; }
-        .btn-frameless-danger:hover { color: #dc2626; }
+
+        .stealth-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
 
         /* מסך תוצאות */
         #results-screen { 
@@ -320,9 +345,7 @@
             min-width: 4px; 
         }
 
-        .row-bar-fast-start {
-            transition: width 3.6s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
-        }
+        .row-bar-fast-start { transition: width 3.6s cubic-bezier(0.1, 0.9, 0.2, 1) !important; }
 
         .row-val { 
             font-size: 1.15rem; 
@@ -333,11 +356,9 @@
             opacity: 0; 
             transition: opacity 0.4s ease-in;
         }
-        .row-val.show-val {
-            opacity: 1;
-        }
+        .row-val.show-val { opacity: 1; }
 
-        /* מסך ספירה לאחור */
+        /* ספירה לאחור */
         #countdown-overlay {
             display: none;
             position: fixed;
@@ -349,13 +370,7 @@
             align-items: center;
             overflow: hidden;
         }
-        #fireworks-canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
+        #fireworks-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
         .countdown-number {
             font-size: 18rem;
             font-weight: 900;
@@ -377,14 +392,13 @@
 
     <!-- לוגו דרכא -->
     <div class="school-logo">
-        <img src="logo.png" alt="תיכון דרכא למדעים ואמנויות ע&quot;ש מקסים לוי">
+        <img src="logo.png" alt="תיכון דרכא">
     </div>
 
     <!-- מסך תלמיד -->
     <div id="student-view">
-        <!-- מסך הנעילה המופיע כשההצבעה אינה פעילה -->
         <div id="lock-overlay">
-            <svg class="lock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg class="lock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
             </svg>
             <div class="lock-title">ההצבעה נעולה</div>
@@ -400,26 +414,26 @@
             <h3 style="color: #0f172a;">אישור הצבעה</h3>
             <p id="modal-text" style="margin: 15px 0; font-size: 1.2rem; color: #475569;"></p>
             <button class="btn btn-confirm" onclick="submitVote()">אישור והצבעה</button>
-            <button class="btn btn-cancel" onclick="closeModal()">שינוי בחירה</button>
+            <button class="btn btn-cancel" onclick="closeModal()">שינויבחירה</button>
         </div>
     </div>
 
-    <!-- מסך מנהל -->
+    <!-- מסך מנהל / צופים -->
     <div id="admin-view">
         <div class="admin-main-container">
-            <!-- קוד QR לסריקה משמאל לקלפי (מוגדל ב-50%) -->
+            <!-- קוד QR -->
             <div class="qr-container">
                 <img src="pollvibe_qr.png" alt="QR לסריקה" class="qr-image">
                 <div class="qr-label">סרק להצבעה 📱</div>
             </div>
 
-            <!-- קלפי (מוגדלת ב-50%) -->
+            <!-- קלפי -->
             <div class="box-container" id="box-container">
                 <img src="kalfi_tp.png" alt="קלפי" class="kalfi-image">
             </div>
         </div>
 
-        <!-- מונה קולות ממוקם כעת מתחת לברקוד ולקלפי -->
+        <!-- מונה קולות מרווח מתחת -->
         <div class="vote-counter-under">
             <div class="vote-count" id="vote-count">0</div>
             <div class="vote-label">קולות שנרשמו</div>
@@ -427,14 +441,24 @@
 
         <div class="timer-display" id="timer-display"></div>
 
-        <div class="admin-actions">
-            <button class="btn-main-flow state-start" id="main-flow-btn" onclick="handleMainFlow()">התחל הצבעה</button>
-            
-            <div class="sub-actions-row">
-                <button class="btn-frameless" id="sim-btn" onclick="handleSimulation()">הפעל סימולציה (200 קולות)</button>
-                <span style="color: #cbd5e1;">|</span>
-                <button class="btn-frameless btn-frameless-danger" onclick="resetVoting()">איפוס נתונים</button>
-            </div>
+        <!-- כפתורי ניהול מוצנעים אפורים בצד שמאל למטה -->
+        <div class="stealth-admin-panel">
+            <!-- כפתור עליון: פליי / סטופ / עין -->
+            <button class="stealth-btn" id="stealth-main-btn" onclick="handleMainFlow()" title="ניהול הצבעה">
+                <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="icon-stop" viewBox="0 0 24 24" style="display:none;"><path d="M6 6h12v12H6z"/></svg>
+                <svg id="icon-eye" viewBox="0 0 24 24" style="display:none;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </button>
+
+            <!-- כפתור אמצעי: בוט (סימולטור) -->
+            <button class="stealth-btn" id="stealth-sim-btn" onclick="handleSimulation()" title="סימולציה">
+                <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 012 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 017 7h1a1 1 0 011 1v3a1 1 0 01-1 1h-1v1a2 2 0 01-2 2H5a2 2 0 01-2-2v-1H2a1 1 0 01-1-1v-3a1 1 0 011-1h1a7 7 0 017-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 012-2M7.5 13A1.5 1.5 0 006 14.5 1.5 1.5 0 007.5 16 1.5 1.5 0 009 14.5 1.5 1.5 0 007.5 13m9 0a1.5 1.5 0 00-1.5 1.5 1.5 1.5 0 001.5 1.5 1.5 1.5 0 001.5-1.5 1.5 1.5 0 00-1.5-1.5M9 18v1h6v-1H9z"/></svg>
+            </button>
+
+            <!-- כפתור תחתון: איפוס (אפס) -->
+            <button class="stealth-btn" onclick="resetVoting()" title="איפוס נתונים">
+                <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            </button>
         </div>
     </div>
 
@@ -445,7 +469,7 @@
         <div class="horizontal-chart-container" id="chart-container"></div>
     </div>
 
-    <!-- ספירה לאחור חווייתית -->
+    <!-- ספירה לאחור -->
     <div id="countdown-overlay">
         <canvas id="fireworks-canvas"></canvas>
         <div id="countdown-num-box"></div>
@@ -595,39 +619,35 @@
             ws.send(JSON.stringify({ type: 'VOTE', party: selectedParty, deviceId }));
         }
 
+        /* עדכון אייקון הכפתור הראשי בלבד */
         function updateAdminUI(total) {
-            const flowBtn = document.getElementById('main-flow-btn');
+            const iconPlay = document.getElementById('icon-play');
+            const iconStop = document.getElementById('icon-stop');
+            const iconEye = document.getElementById('icon-eye');
+
+            iconPlay.style.display = 'none';
+            iconStop.style.display = 'none';
+            iconEye.style.display = 'none';
 
             if (currentStatus === 'voting') {
-                flowBtn.innerText = "עצור הצבעה";
-                flowBtn.className = "btn-main-flow state-stop";
-                flowBtn.disabled = false;
-            } else if (currentStatus === 'stopping') {
-                flowBtn.innerText = "חכה לסגירה...";
-                flowBtn.disabled = true;
+                iconStop.style.display = 'block';
             } else if (currentStatus === 'closed') {
                 if (hasVotedInSession) {
-                    flowBtn.innerText = "חשוף תוצאות 🚀";
-                    flowBtn.className = "btn-main-flow state-reveal";
-                    flowBtn.disabled = false;
+                    iconEye.style.display = 'block';
                 } else {
-                    flowBtn.innerText = "התחל הצבעה";
-                    flowBtn.className = "btn-main-flow state-start";
-                    flowBtn.disabled = false;
+                    iconPlay.style.display = 'block';
                 }
             }
         }
 
         function handleMainFlow() {
-            const flowBtn = document.getElementById('main-flow-btn');
-
-            if (currentStatus === 'closed' && flowBtn.innerText.includes("התחל")) {
+            if (currentStatus === 'closed' && !hasVotedInSession) {
                 if (isSimulating) stopSimulationInternal();
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'START' }));
             } else if (currentStatus === 'voting') {
                 if (isSimulating) stopSimulationInternal();
                 ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'STOP' }));
-            } else if (currentStatus === 'closed' && flowBtn.innerText.includes("חשוף")) {
+            } else if (currentStatus === 'closed' && hasVotedInSession) {
                 startGrandCountdown();
             }
         }
@@ -650,9 +670,6 @@
         function startSimulationSequence() {
             isSimulating = true;
             simVotesCount = 0;
-
-            const simBtn = document.getElementById('sim-btn');
-            simBtn.innerText = "עצור סימולציה";
 
             ws.send(JSON.stringify({ type: 'ADMIN_ACTION', action: 'RESET' }));
             
@@ -683,23 +700,21 @@
         function stopSimulationInternal() {
             if (simTimeout) clearTimeout(simTimeout);
             isSimulating = false;
-            
-            const simBtn = document.getElementById('sim-btn');
-            if (simBtn) {
-                simBtn.innerText = "הפעל סימולציה (200 קולות)";
-            }
         }
 
+        /* יצירת מעטפה עם פיזור נחיתה רחב */
         function spawnEnvelope() {
             const container = document.getElementById('box-container');
             const env = document.createElement('div');
             env.className = 'envelope';
-            env.style.left = (150 + (Math.random() * 60 - 30)) + 'px';
+            // פיזור רחב יותר ממעל התיבה (-60px עד +60px)
+            const randomOffset = (Math.random() * 120) - 60;
+            env.style.left = (125 + randomOffset) + 'px';
             container.appendChild(env);
-            setTimeout(() => env.remove(), 1100);
+            setTimeout(() => env.remove(), 1200);
         }
 
-        /* --- ספירה לאחור 5 עד 1 --- */
+        /* --- ספירה לאחור --- */
         function startGrandCountdown() {
             if (isSimulating) stopSimulationInternal();
 
