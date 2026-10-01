@@ -150,15 +150,15 @@
         .btn-confirm { background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
         .btn-cancel { background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
 
-        /* === תצוגת מנהל === */
+        /* === תצוגת מנהל מעודכנת (מונמכת ומוגדלת) === */
         #admin-view { 
             display: none; 
             height: 100vh; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center;
-            gap: 25px;
-            padding: 40px 20px; 
+            gap: 20px;
+            padding: 80px 20px 30px 20px; /* מונמך מראש המסך */
             position: relative;
         }
         
@@ -166,15 +166,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 70px;
+            gap: 90px;
             width: 100%;
-            max-width: 950px;
+            max-width: 1100px;
+            margin-top: 40px; /* הנמכת האלמנטים במרכז המסך */
         }
 
+        /* התיבות והאלמנטים הוגדלו ב-50% */
         .box-container { 
             position: relative; 
-            width: 300px;
-            height: 300px;
+            width: 450px; /* מוגדל ב-50% */
+            height: 450px;
             display: flex; 
             align-items: center;
             justify-content: center;
@@ -185,27 +187,27 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            width: 300px;
-            height: 300px;
+            gap: 16px;
+            width: 450px; /* מוגדל ב-50% */
+            height: 450px;
             background: transparent;
             border: none;
             box-shadow: none;
         }
         .qr-image {
-            width: 220px;
-            height: 220px;
+            width: 330px; /* מוגדל ב-50% מ-220px */
+            height: 330px;
             object-fit: contain;
             filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.04));
         }
         .qr-label {
-            font-size: 1.15rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 800;
             color: #475569;
         }
         
         .kalfi-image { 
-            width: 290px; 
+            width: 435px; /* מוגדל ב-50% מ-290px */
             height: auto; 
             object-fit: contain; 
             filter: drop-shadow(0px 12px 24px rgba(0, 0, 0, 0.12));
@@ -217,17 +219,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 5px;
+            margin-top: 10px;
         }
         .vote-count { 
-            font-size: 4.5rem; 
+            font-size: 4.8rem; 
             font-weight: 900; 
             color: #2563eb; 
             line-height: 1; 
             letter-spacing: -1px;
         }
         .vote-label { 
-            font-size: 1.15rem; 
+            font-size: 1.2rem; 
             color: #64748b; 
             margin-top: 6px; 
             font-weight: 600; 
@@ -235,13 +237,13 @@
 
         .envelope { 
             position: absolute; 
-            width: 50px; 
-            height: 32px; 
+            width: 65px; 
+            height: 42px; 
             background: #ffffff; 
             border: 1px solid #cbd5e1;
             border-radius: 4px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            top: -120px; 
+            top: -150px; 
             z-index: 1; 
             animation: dropIntoKalfi 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
         }
@@ -249,16 +251,16 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            border-left: 25px solid transparent;
-            border-right: 25px solid transparent;
-            border-top: 18px solid #f1f5f9;
+            border-left: 32px solid transparent;
+            border-right: 32px solid transparent;
+            border-top: 22px solid #f1f5f9;
         }
 
         @keyframes dropIntoKalfi {
-            0% { top: -120px; opacity: 0; transform: scale(1.1) rotate(-15deg); }
+            0% { top: -150px; opacity: 0; transform: scale(1.1) rotate(-15deg); }
             20% { opacity: 1; }
-            85% { top: 40px; opacity: 1; transform: scale(0.9) rotate(5deg); }
-            100% { top: 75px; opacity: 0; transform: scale(0.3) rotate(0deg); }
+            85% { top: 60px; opacity: 1; transform: scale(0.9) rotate(5deg); }
+            100% { top: 110px; opacity: 0; transform: scale(0.3) rotate(0deg); }
         }
         
         .stealth-admin-panel {
@@ -307,14 +309,15 @@
             opacity: 0.85;
         }
 
-        /* מסך תוצאות */
+        /* === מסך תוצאות === */
         #results-screen { 
             display: none; 
             height: 100vh; 
-            padding: 25px 30px 15px 30px; 
+            padding: 25px 20px 20px 20px; 
             flex-direction: column; 
             align-items: center; 
             position: relative;
+            overflow: hidden;
         }
 
         .btn-back-corner {
@@ -339,22 +342,24 @@
         .btn-back-corner:hover { background: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
 
         .results-header {
-            font-size: 1.8rem;
-            font-weight: 800;
+            font-size: 2rem;
+            font-weight: 900;
             color: #0f172a;
-            margin-bottom: 15px;
-            align-self: flex-start;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
         }
 
         .horizontal-chart-container { 
             display: flex; 
             flex-direction: column; 
-            justify-content: space-evenly; 
-            gap: 8px; 
+            gap: 10px; 
             width: 100%; 
-            max-width: 1200px; 
+            max-width: 1100px; 
             flex: 1; 
-            overflow: hidden; 
+            overflow-y: auto; 
+            padding-right: 5px;
+            padding-bottom: 50px;
         }
         
         .row-group { 
@@ -363,18 +368,18 @@
             gap: 15px; 
             width: 100%; 
             background: #ffffff; 
-            padding: 8px 16px; 
+            padding: 10px 16px; 
             border-radius: 10px; 
             border: 1px solid #e2e8f0; 
             box-shadow: 0 1px 4px rgba(0,0,0,0.02);
-            flex: 1;
-            max-height: 52px;
+            flex-shrink: 0;
+            min-height: 50px;
         }
         
         .row-label { 
-            width: 220px; 
-            min-width: 220px; 
-            font-size: 1.05rem; 
+            width: 230px; 
+            min-width: 230px; 
+            font-size: 1rem; 
             font-weight: 700; 
             text-align: right; 
             color: #0f172a; 
@@ -383,7 +388,7 @@
             text-overflow: ellipsis;
         }
         
-        .row-bar-wrapper { flex: 1; display: flex; align-items: center; background: #f1f5f9; height: 28px; border-radius: 8px; overflow: hidden; position: relative; }
+        .row-bar-wrapper { flex: 1; display: flex; align-items: center; background: #f1f5f9; height: 26px; border-radius: 8px; overflow: hidden; position: relative; }
         
         .row-bar { 
             height: 100%; 
@@ -438,7 +443,6 @@
             justify-content: center;
         }
 
-        /* תנועת מילים רציפה, זורמת ונקייה ללא שיהוקים */
         .intro-phrase {
             font-size: 4.5rem;
             font-weight: 900;
@@ -450,20 +454,10 @@
         }
 
         @keyframes smoothZoomAndFade {
-            0% { 
-                transform: scale(0.65); 
-                opacity: 0; 
-            }
-            18% { 
-                opacity: 1; 
-            }
-            82% { 
-                opacity: 1; 
-            }
-            100% { 
-                transform: scale(1.22); 
-                opacity: 0; 
-            }
+            0% { transform: scale(0.65); opacity: 0; }
+            18% { opacity: 1; }
+            82% { opacity: 1; }
+            100% { transform: scale(1.22); opacity: 0; }
         }
 
         .countdown-number {
@@ -553,7 +547,7 @@
             </button>
 
             <!-- גרסה מעודכנת -->
-            <div class="version-tag">v1.22</div>
+            <div class="version-tag">v1.24</div>
         </div>
     </div>
 
@@ -810,8 +804,8 @@
             const container = document.getElementById('box-container');
             const env = document.createElement('div');
             env.className = 'envelope';
-            const randomOffset = (Math.random() * 120) - 60;
-            env.style.left = (125 + randomOffset) + 'px';
+            const randomOffset = (Math.random() * 160) - 80;
+            env.style.left = (190 + randomOffset) + 'px';
             container.appendChild(env);
             setTimeout(() => env.remove(), 1200);
         }
