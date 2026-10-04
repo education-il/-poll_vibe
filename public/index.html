@@ -389,7 +389,6 @@
         
         .row-bar-wrapper { flex: 1; display: flex; align-items: center; background: #f1f5f9; height: 26px; border-radius: 8px; overflow: hidden; position: relative; }
         
-        /* משך גדילה מואט בחצי (7.2 שניות) */
         .row-bar { 
             height: 100%; 
             background: linear-gradient(90deg, #3b82f6, #1d4ed8); 
@@ -547,7 +546,7 @@
             </button>
 
             <!-- גרסה מעודכנת -->
-            <div class="version-tag">v1.25</div>
+            <div class="version-tag">v1.26</div>
         </div>
     </div>
 
@@ -588,7 +587,8 @@
         localStorage.setItem('poll_device_id', deviceId);
 
         let selectedPartyObj = null;
-        let isAdmin = location.pathname.includes('/admin-control-x9z87');
+        // בדיקת הכתובת החדשה /admin
+        let isAdmin = location.pathname.endsWith('/admin');
         let currentStatus = 'closed';
         let votesData = {};
 
@@ -898,13 +898,11 @@
                 `;
                 container.appendChild(row);
 
-                // השהיה של שנייה (1000ms) לפני תחילת גדילת העמודות
                 setTimeout(() => {
                     const barEl = document.getElementById(`bar-${encodeURIComponent(partyKey)}`);
                     if (barEl) barEl.style.width = pct + '%';
                 }, 1000);
 
-                // תצוגת הנתונים בסיום הגדילה המואטת (1000ms השהיה + 7200ms גדילה)
                 setTimeout(() => {
                     const valEl = document.getElementById(`val-${encodeURIComponent(partyKey)}`);
                     if (valEl) valEl.classList.add('show-val');
