@@ -11,7 +11,7 @@ const wss = new WebSocket.Server({ server });
 app.use(express.static(path.join(__dirname, 'public')));
 
 // נתיב מפורש למנהל
-app.get('/admin-control-x9z87', (req, res) => {
+app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -21,14 +21,14 @@ const PARTIES = [
     { letters: 'רק', name: 'ביחד בראשות נפתלי בנט' },
     { letters: 'כן', name: 'כחול לבן בראשות בני גנץ' },
     { letters: 'אמת', name: 'הדמוקרטים בראשות יאיר גולן' },
-    { letters: 'שס', name: 'התאחדות הספרדים שומרי התורה' },
+    { letters: 'שס', name: 'ש"ס התאחדות הספרדים שומרי התורה' },
     { letters: 'ג', name: 'יהדות התורה והשבת אגודת ישראל - דגל התורה' },
     { letters: 'ט', name: 'הציונות הדתית בראשות בצלאל סמוטריץ\' וזהות בראשות משה פייגלין' },
     { letters: 'ב', name: 'עוצמה יהודית בראשות איתמר בן גביר' },
     { letters: 'ל', name: 'ישראל ביתנו בראשות אביגדור ליברמן' },
     { letters: 'עם', name: 'רע"ם - הרשימה הערבית המאוחדת' },
     { letters: 'ודם', name: 'הרשימה המשותפת (חד"ש, תע"ל, בל"ד)' },
-    { letters: 'דרך', name: 'בראשות גדי איזנקוט' },
+    { letters: 'דרך', name: 'ישר בראשות גדי איזנקוט' },
     { letters: 'ך', name: 'עמך ישראל בראשות עופר וינטר' },
     { letters: 'ני', name: 'נעם לישראל למען עתיד הילדים בראשות אבי מעוז' }
 ];
